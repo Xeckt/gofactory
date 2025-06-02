@@ -17,7 +17,7 @@ type GoFactoryClient struct {
 	client *http.Client
 }
 
-type APIResponse interface{}
+type ApiResponse interface{}
 
 func NewGoFactoryClient(url string, token string) *GoFactoryClient {
 	return &GoFactoryClient{
@@ -43,7 +43,7 @@ func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []b
 	return request, nil
 }
 
-func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Request, response APIResponse) (*APIError, error) {
+func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Request, response ApiResponse) (*APIError, error) {
 	resp, err := c.client.Do(request.WithContext(ctx))
 	if err != nil {
 		log.Fatal(err)
