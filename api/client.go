@@ -51,7 +51,11 @@ func (c *GoFactoryClient) sendPostRequest(request *http.Request, response APIRes
 
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
 		var apiError APIError
-		return nil, json.NewDecoder(resp.Body).Decode(&apiError)
+		err := json.NewDecoder(resp.Body).Decode(&apiError)
+		if err != nil {
+			return nil, err
+		}
+		return &apiError, nil
 	}
 
 	fmt.Println(resp.Body)
