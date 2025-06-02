@@ -21,7 +21,7 @@ type ServerOptions struct {
 
 func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, error) {
 
-	optionsResponse, err := createAndSendPostRequest[getServerOptionsResponse](c,
+	optionsResponse, err := CreateAndSendPostRequest[getServerOptionsResponse](c,
 		GetServerOptionsFunction,
 		createGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {

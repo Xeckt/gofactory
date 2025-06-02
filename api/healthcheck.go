@@ -33,7 +33,7 @@ func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckRespon
 		return nil, err
 	}
 
-	healthCheckResponse, err := createAndSendPostRequest[healthCheckResponseData](c, HealthCheckFunction, functionBody)
+	healthCheckResponse, err := CreateAndSendPostRequest[healthCheckResponseData](c, HealthCheckFunction, functionBody)
 	if err != nil {
 		return nil, err
 	}

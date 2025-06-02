@@ -29,7 +29,7 @@ func NewGoFactoryClient(url string, token string) *GoFactoryClient {
 }
 
 func (c *GoFactoryClient) VerifyToken() (*APIError, error) {
-	request, err := c.createPostRequest(VerifyAuthTokenFunction, createGenericFunctionBody(VerifyAuthTokenFunction))
+	request, err := c.CreatePostRequest(VerifyAuthTokenFunction, createGenericFunctionBody(VerifyAuthTokenFunction))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +53,7 @@ func (c *GoFactoryClient) VerifyToken() (*APIError, error) {
 	return &apiError, nil
 }
 
-func (c *GoFactoryClient) createPostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
+func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
 	request, err := http.NewRequest(http.MethodPost, c.url+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
 	if err != nil {
 		return nil, err
@@ -65,7 +65,7 @@ func (c *GoFactoryClient) createPostRequest(functionName string, apiFunction []b
 	return request, nil
 }
 
-func (c *GoFactoryClient) sendPostRequest(request *http.Request, response APIResponse) (*APIError, error) {
+func (c *GoFactoryClient) SendPostRequest(request *http.Request, response APIResponse) (*APIError, error) {
 	resp, err := c.client.Do(request)
 	if err != nil {
 		log.Fatal(err)
@@ -83,13 +83,13 @@ func (c *GoFactoryClient) sendPostRequest(request *http.Request, response APIRes
 	return nil, json.NewDecoder(resp.Body).Decode(response)
 }
 
-func createAndSendPostRequest[Resp any](c *GoFactoryClient, functionName string, apiFunction []byte) (*Resp, error) {
-	request, err := c.createPostRequest(functionName, apiFunction)
+func CreateAndSendPostRequest[Resp any](c *GoFactoryClient, functionName string, apiFunction []byte) (*Resp, error) {
+	request, err := c.CreatePostRequest(functionName, apiFunction)
 	if err != nil {
 		return nil, err
 	}
 	var resp Resp
-	apiError, err := c.sendPostRequest(request, &resp)
+	apiError, err := c.SendPostRequest(request, &resp)
 	if err != nil {
 		return nil, err
 	}
