@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-const Version = "0.1.0"
+const Version = "0.2.0"
 
 type GoFactoryClient struct {
 	url    string
@@ -29,31 +29,6 @@ func NewGoFactoryClient(url string, token string) *GoFactoryClient {
 			},
 		},
 	}
-}
-
-func (c *GoFactoryClient) VerifyToken() (*APIError, error) {
-	request, err := c.CreatePostRequest(VerifyAuthTokenFunction, createGenericFunctionBody(VerifyAuthTokenFunction))
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := c.client.Do(request)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 204 {
-		return nil, nil
-	}
-
-	var apiError APIError
-	err = json.NewDecoder(resp.Body).Decode(&apiError)
-	if err != nil {
-		return nil, err
-	}
-
-	return &apiError, nil
 }
 
 func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
