@@ -6,7 +6,7 @@ type getServerOptionsResponse struct {
 
 type GetServerOptionsData struct {
 	ServerOptions        ServerOptions `json:"serverOptions"`
-	PendingServerOptions ServerOptions `json:"pendingServerOptions"`
+	PendingServerOptions ServerOptions `json:"pendingServerOptions,omitempty"`
 }
 
 type ServerOptions struct {
