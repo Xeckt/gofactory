@@ -2,7 +2,7 @@ package api
 
 import "encoding/json"
 
-type GetServerOptionsResponse struct {
+type getServerOptionsResponse struct {
 	Data GetServerOptionsData `json:"data"`
 }
 
@@ -35,7 +35,7 @@ func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, *APIError, 
 		return nil, nil, err
 	}
 
-	var options GetServerOptionsResponse
+	var options getServerOptionsResponse
 	apiErr, err := c.sendPostRequest(request, &options)
 	if err != nil {
 		return nil, nil, err

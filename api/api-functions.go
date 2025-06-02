@@ -1,5 +1,9 @@
 package api
 
+type genericFunctionBody struct {
+	Function string `json:"function"`
+}
+
 const HealthCheckFunction = "HealthCheck"
 
 const VerifyAuthTokenFunction = "VerifyAuthenticationToken"
