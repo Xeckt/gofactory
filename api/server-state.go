@@ -1,5 +1,7 @@
 package api
 
+import "context"
+
 type QueryServerStateData struct {
 	ActiveSessionName   string  `json:"activeSessionName"`
 	NumConnectedPlayers int     `json:"numConnectedPlayers"`
@@ -20,8 +22,8 @@ type QueryServerStateResponse struct {
 	} `json:"data"`
 }
 
-func (c *GoFactoryClient) QueryServerState() (*QueryServerStateData, error) {
-	queryServerResponse, err := CreateAndSendPostRequest[QueryServerStateResponse](c,
+func (c *GoFactoryClient) QueryServerState(ctx context.Context) (*QueryServerStateData, error) {
+	queryServerResponse, err := CreateAndSendPostRequest[QueryServerStateResponse](ctx, c,
 		QueryServerStateFunction,
 		createGenericFunctionBody(QueryServerStateFunction))
 	if err != nil {

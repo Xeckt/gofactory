@@ -1,5 +1,7 @@
 package api
 
+import "context"
+
 type GetServerOptionsResponse struct {
 	Data GetServerOptionsData `json:"data"`
 }
@@ -19,9 +21,9 @@ type ServerOptions struct {
 	NetworkQuality        string `json:"FG.NetworkQuality"`
 }
 
-func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, error) {
+func (c *GoFactoryClient) GetServerOptions(ctx context.Context) (*GetServerOptionsData, error) {
 
-	optionsResponse, err := CreateAndSendPostRequest[GetServerOptionsResponse](c,
+	optionsResponse, err := CreateAndSendPostRequest[GetServerOptionsResponse](ctx, c,
 		GetServerOptionsFunction,
 		createGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {

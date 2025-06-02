@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"encoding/json"
 )
 
@@ -22,7 +23,7 @@ type HealthCheckRequest struct {
 	Data     HealthCheckCustomData `json:"data"`
 }
 
-func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckResponse, error) {
+func (c *GoFactoryClient) GetServerHealth(ctx context.Context, customData string) (*HealthCheckResponse, error) {
 	functionBody, err := json.Marshal(HealthCheckRequest{
 		Function: HealthCheckFunction,
 		Data: HealthCheckCustomData{
@@ -33,7 +34,7 @@ func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckRespon
 		return nil, err
 	}
 
-	healthCheckResponse, err := CreateAndSendPostRequest[HealthCheckResponseData](c, HealthCheckFunction, functionBody)
+	healthCheckResponse, err := CreateAndSendPostRequest[HealthCheckResponseData](ctx, c, HealthCheckFunction, functionBody)
 	if err != nil {
 		return nil, err
 	}

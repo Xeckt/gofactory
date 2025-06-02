@@ -1,5 +1,7 @@
 package api
 
+import "context"
+
 type AppliedAdvancedGameSettings struct {
 	NoPower                         string `json:"FG.GameRules.NoPower"`
 	StartingTier                    string `json:"FG.GameRules.StartingTier"`
@@ -20,8 +22,8 @@ type AdvancedGameSettingsResponse struct {
 	} `json:"data"`
 }
 
-func (c *GoFactoryClient) GetAdvancedGameSettings() (*AppliedAdvancedGameSettings, error) {
-	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](c,
+func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AppliedAdvancedGameSettings, error) {
+	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](ctx, c,
 		GetAdvancedGameSettingsFunction,
 		createGenericFunctionBody(GetAdvancedGameSettingsFunction))
 	if err != nil {
