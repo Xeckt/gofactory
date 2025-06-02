@@ -5,6 +5,15 @@ import (
 	"log"
 )
 
+type HealthCheckResponse struct {
+	Health     string `json:"health"`
+	CustomData string `json:"serverCustomData"`
+}
+
+type healthCheckResponseData struct {
+	Data HealthCheckResponse `json:"data"`
+}
+
 type healthCheckCustomData struct {
 	CustomData string `json:"clientCustomData"`
 }
@@ -14,27 +23,20 @@ type healthCheckRequest struct {
 	Data     healthCheckCustomData `json:"data"`
 }
 
-type HealthCheckResponse struct {
-	Data struct {
-		Health     string `json:"health"`
-		CustomData string `json:"serverCustomData"`
-	} `json:"data"`
-}
-
 func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckResponse, *APIError, error) {
-	request, err := json.Marshal(healthCheckRequest{
+	functionBody, err := json.Marshal(healthCheckRequest{
 		Function: HealthCheckFunction,
 		Data: healthCheckCustomData{
 			CustomData: customData,
 		},
 	})
 
-	req, err := c.createPostRequest(HealthCheckFunction, request)
+	req, err := c.createPostRequest(HealthCheckFunction, functionBody)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var healthCheckResponse HealthCheckResponse
+	var healthCheckResponse healthCheckResponseData
 	apiErr, err := c.sendPostRequest(req, &healthCheckResponse)
 	if err != nil {
 		log.Fatal(err)
@@ -44,5 +46,5 @@ func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckRespon
 		return nil, apiErr, nil
 	}
 
-	return &healthCheckResponse, nil, nil
+	return &healthCheckResponse.Data, nil, nil
 }

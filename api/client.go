@@ -57,7 +57,5 @@ func (c *GoFactoryClient) sendPostRequest(request *http.Request, response APIRes
 		}
 		return &apiError, nil
 	}
-
-	fmt.Println(resp.Body)
 	return nil, json.NewDecoder(resp.Body).Decode(response)
 }
