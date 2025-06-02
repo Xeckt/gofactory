@@ -25,7 +25,7 @@ type AdvancedGameSettingsResponse struct {
 func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AppliedAdvancedGameSettings, error) {
 	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](ctx, c,
 		GetAdvancedGameSettingsFunction,
-		createGenericFunctionBody(GetAdvancedGameSettingsFunction))
+		CreateGenericFunctionBody(GetAdvancedGameSettingsFunction))
 	if err != nil {
 		return nil, err
 	}

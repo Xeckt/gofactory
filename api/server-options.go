@@ -25,7 +25,7 @@ func (c *GoFactoryClient) GetServerOptions(ctx context.Context) (*GetServerOptio
 
 	optionsResponse, err := CreateAndSendPostRequest[GetServerOptionsResponse](ctx, c,
 		GetServerOptionsFunction,
-		createGenericFunctionBody(GetServerOptionsFunction))
+		CreateGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {
 		return nil, err
 	}

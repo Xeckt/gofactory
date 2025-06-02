@@ -25,7 +25,7 @@ type QueryServerStateResponse struct {
 func (c *GoFactoryClient) QueryServerState(ctx context.Context) (*QueryServerStateData, error) {
 	queryServerResponse, err := CreateAndSendPostRequest[QueryServerStateResponse](ctx, c,
 		QueryServerStateFunction,
-		createGenericFunctionBody(QueryServerStateFunction))
+		CreateGenericFunctionBody(QueryServerStateFunction))
 	if err != nil {
 		return nil, err
 	}
