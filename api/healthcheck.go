@@ -9,23 +9,23 @@ type HealthCheckResponse struct {
 	CustomData string `json:"serverCustomData"`
 }
 
-type healthCheckResponseData struct {
+type HealthCheckResponseData struct {
 	Data HealthCheckResponse `json:"data"`
 }
 
-type healthCheckCustomData struct {
+type HealthCheckCustomData struct {
 	CustomData string `json:"clientCustomData"`
 }
 
-type healthCheckRequest struct {
+type HealthCheckRequest struct {
 	Function string                `json:"function"`
-	Data     healthCheckCustomData `json:"data"`
+	Data     HealthCheckCustomData `json:"data"`
 }
 
 func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckResponse, error) {
-	functionBody, err := json.Marshal(healthCheckRequest{
+	functionBody, err := json.Marshal(HealthCheckRequest{
 		Function: HealthCheckFunction,
-		Data: healthCheckCustomData{
+		Data: HealthCheckCustomData{
 			CustomData: customData,
 		},
 	})
@@ -33,7 +33,7 @@ func (c *GoFactoryClient) GetServerHealth(customData string) (*HealthCheckRespon
 		return nil, err
 	}
 
-	healthCheckResponse, err := CreateAndSendPostRequest[healthCheckResponseData](c, HealthCheckFunction, functionBody)
+	healthCheckResponse, err := CreateAndSendPostRequest[HealthCheckResponseData](c, HealthCheckFunction, functionBody)
 	if err != nil {
 		return nil, err
 	}

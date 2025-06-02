@@ -1,6 +1,6 @@
 package api
 
-type getServerOptionsResponse struct {
+type GetServerOptionsResponse struct {
 	Data GetServerOptionsData `json:"data"`
 }
 
@@ -21,7 +21,7 @@ type ServerOptions struct {
 
 func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, error) {
 
-	optionsResponse, err := CreateAndSendPostRequest[getServerOptionsResponse](c,
+	optionsResponse, err := CreateAndSendPostRequest[GetServerOptionsResponse](c,
 		GetServerOptionsFunction,
 		createGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {

@@ -14,14 +14,14 @@ type QueryServerStateData struct {
 	AutoLoadSessionName string  `json:"autoLoadSessionName"`
 }
 
-type queryServerStateResponse struct {
+type QueryServerStateResponse struct {
 	Data struct {
 		State QueryServerStateData `json:"serverGameState"`
 	} `json:"data"`
 }
 
 func (c *GoFactoryClient) QueryServerState() (*QueryServerStateData, error) {
-	queryServerResponse, err := CreateAndSendPostRequest[queryServerStateResponse](c,
+	queryServerResponse, err := CreateAndSendPostRequest[QueryServerStateResponse](c,
 		QueryServerStateFunction,
 		createGenericFunctionBody(QueryServerStateFunction))
 	if err != nil {

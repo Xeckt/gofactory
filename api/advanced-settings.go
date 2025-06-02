@@ -14,14 +14,14 @@ type AppliedAdvancedGameSettings struct {
 	FlightMode                      string `json:"FG.PlayerRules.FlightMode"`
 }
 
-type advancedGameSettingsResponse struct {
+type AdvancedGameSettingsResponse struct {
 	Data struct {
 		Settings AppliedAdvancedGameSettings `json:"AppliedAdvancedGameSettings"`
 	} `json:"data"`
 }
 
 func (c *GoFactoryClient) GetAdvancedGameSettings() (*AppliedAdvancedGameSettings, error) {
-	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[advancedGameSettingsResponse](c,
+	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](c,
 		GetAdvancedGameSettingsFunction,
 		createGenericFunctionBody(GetAdvancedGameSettingsFunction))
 	if err != nil {
