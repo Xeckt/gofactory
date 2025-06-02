@@ -8,6 +8,8 @@ import (
 	"net/http"
 )
 
+const Version = "0.1.0"
+
 type GoFactoryClient struct {
 	url    string
 	token  string
