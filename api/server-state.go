@@ -20,19 +20,12 @@ type queryServerStateResponse struct {
 	} `json:"data"`
 }
 
-func (c *GoFactoryClient) QueryServerState() (*QueryServerStateData, *APIError, error) {
-	request, err := c.createPostRequest(QueryServerStateFunction, createGenericFunctionBody(QueryServerStateFunction))
+func (c *GoFactoryClient) QueryServerState() (*QueryServerStateData, error) {
+	queryServerResponse, err := createAndSendPostRequest[queryServerStateResponse](c,
+		QueryServerStateFunction,
+		createGenericFunctionBody(QueryServerStateFunction))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	var query queryServerStateResponse
-	apiErr, err := c.sendPostRequest(request, &query)
-	if err != nil {
-		return nil, nil, err
-	}
-	if apiErr != nil {
-		return nil, apiErr, nil
-	}
-	return &query.Data.State, nil, nil
+	return &queryServerResponse.Data.State, nil
 }

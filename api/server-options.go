@@ -19,21 +19,13 @@ type ServerOptions struct {
 	NetworkQuality        string `json:"FG.NetworkQuality"`
 }
 
-// Pointer generics without T any interfaces would be cool right about now....
-func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, *APIError, error) {
-	request, err := c.createPostRequest(GetServerOptionsFunction, createGenericFunctionBody(GetServerOptionsFunction))
-	if err != nil {
-		return nil, nil, err
-	}
+func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, error) {
 
-	var options getServerOptionsResponse
-	apiErr, err := c.sendPostRequest(request, &options)
+	optionsResponse, err := createAndSendPostRequest[getServerOptionsResponse](c,
+		GetServerOptionsFunction,
+		createGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	if apiErr != nil {
-		return nil, apiErr, nil
-	}
-
-	return &options.Data, nil, nil
+	return &optionsResponse.Data, nil
 }

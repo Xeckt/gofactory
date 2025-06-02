@@ -20,19 +20,12 @@ type advancedGameSettingsResponse struct {
 	} `json:"data"`
 }
 
-func (c *GoFactoryClient) GetAdvancedGameSettings() (*AppliedAdvancedGameSettings, *APIError, error) {
-	request, err := c.createPostRequest(GetAdvancedGameSettingsFunction, createGenericFunctionBody(GetAdvancedGameSettingsFunction))
+func (c *GoFactoryClient) GetAdvancedGameSettings() (*AppliedAdvancedGameSettings, error) {
+	appliedAdvanceSettingsResponse, err := createAndSendPostRequest[advancedGameSettingsResponse](c,
+		GetAdvancedGameSettingsFunction,
+		createGenericFunctionBody(GetAdvancedGameSettingsFunction))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-
-	var query advancedGameSettingsResponse
-	apiErr, err := c.sendPostRequest(request, &query)
-	if err != nil {
-		return nil, nil, err
-	}
-	if apiErr != nil {
-		return nil, apiErr, nil
-	}
-	return &query.Data.Settings, nil, nil
+	return &appliedAdvanceSettingsResponse.Data.Settings, nil
 }

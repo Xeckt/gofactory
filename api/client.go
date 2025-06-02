@@ -82,3 +82,19 @@ func (c *GoFactoryClient) sendPostRequest(request *http.Request, response APIRes
 	}
 	return nil, json.NewDecoder(resp.Body).Decode(response)
 }
+
+func createAndSendPostRequest[Resp any](c *GoFactoryClient, functionName string, apiFunction []byte) (*Resp, error) {
+	request, err := c.createPostRequest(functionName, apiFunction)
+	if err != nil {
+		return nil, err
+	}
+	var resp Resp
+	apiError, err := c.sendPostRequest(request, &resp)
+	if err != nil {
+		return nil, err
+	}
+	if apiError != nil {
+		return nil, apiError
+	}
+	return &resp, nil
+}
