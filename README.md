@@ -4,6 +4,8 @@
 
 GoFactory is a (planned) cli tool to interact with your Satisfactory dedicated server, locally or remotely via API.
 
+The code will be modularised into two parts - the API client library, and the CLI tool itself.
+
 ## Roadmap
 
 - [ ] Full integration with the Satisfactory v1 API
