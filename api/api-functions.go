@@ -1,6 +1,6 @@
 package api
 
-const apiHealthCheckFunction = "HealthCheck"
+const HealthCheckFunction = "HealthCheck"
 
 const VerifyAuthTokenFunction = "VerifyAuthenticationToken"
 

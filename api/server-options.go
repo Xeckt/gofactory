@@ -1,25 +1,5 @@
 package api
 
-type SendFunctionRequest struct {
-	Function string `json:"function"`
-}
-
-type HealthCheckCustomData struct {
-	CustomData string `json:"clientCustomData"`
-}
-
-type HealthCheckRequest struct {
-	Function string                `json:"function"`
-	Data     HealthCheckCustomData `json:"data"`
-}
-
-type HealthCheckResponse struct {
-	Data struct {
-		Health     string `json:"health"`
-		CustomData string `json:"serverCustomData"`
-	} `json:"data"`
-}
-
 type GetServerOptionsResponse struct {
 	Data struct {
 		ServerOptions        ServerOptions `json:"serverOptions"`
