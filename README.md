@@ -12,4 +12,4 @@ GoFactory is a (planned) cli tool to interact with your Satisfactory dedicated s
 
 ## Current state
 
-Project has only just started so it is not in a workable state at the moment. While a base source does work, the API client needs a lot of work for it to be done right. Stay tuned!
+Project has only just started so it is not in a workable state at the moment.
