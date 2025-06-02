@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -55,8 +54,7 @@ func (c *GoFactoryClient) VerifyToken() (*APIError, error) {
 }
 
 func (c *GoFactoryClient) createPostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
-	fmt.Println("Debug: ", c.url+"/?function="+functionName)
-	request, err := http.NewRequest(http.MethodPost, c.url+"/?function="+functionName, bytes.NewBuffer(apiFunction))
+	request, err := http.NewRequest(http.MethodPost, c.url+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
 	if err != nil {
 		return nil, err
 	}
