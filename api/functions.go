@@ -9,7 +9,7 @@ type genericFunctionBody struct {
 	Function string `json:"function"`
 }
 
-func createGenericFunctionBody(function string) []byte {
+func CreateGenericFunctionBody(function string) []byte {
 	body, err := json.Marshal(genericFunctionBody{
 		Function: function,
 	})
