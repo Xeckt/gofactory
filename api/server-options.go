@@ -1,7 +1,5 @@
 package api
 
-import "encoding/json"
-
 type getServerOptionsResponse struct {
 	Data GetServerOptionsData `json:"data"`
 }
@@ -23,14 +21,7 @@ type ServerOptions struct {
 
 // Pointer generics without T any interfaces would be cool right about now....
 func (c *GoFactoryClient) GetServerOptions() (*GetServerOptionsData, *APIError, error) {
-	functionBody, err := json.Marshal(genericFunctionBody{
-		Function: GetServerOptionsFunction,
-	})
-	if err != nil {
-		return nil, nil, err
-	}
-
-	request, err := c.createPostRequest(GetServerOptionsFunction, functionBody)
+	request, err := c.createPostRequest(GetServerOptionsFunction, createGenericFunctionBody(GetServerOptionsFunction))
 	if err != nil {
 		return nil, nil, err
 	}

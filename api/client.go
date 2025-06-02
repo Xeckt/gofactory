@@ -29,6 +29,31 @@ func NewGoFactoryClient(url string, token string) *GoFactoryClient {
 	}
 }
 
+func (c *GoFactoryClient) VerifyToken() (*APIError, error) {
+	request, err := c.createPostRequest(VerifyAuthTokenFunction, createGenericFunctionBody(VerifyAuthTokenFunction))
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.client.Do(request)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 204 {
+		return nil, nil
+	}
+
+	var apiError APIError
+	err = json.NewDecoder(resp.Body).Decode(&apiError)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apiError, nil
+}
+
 func (c *GoFactoryClient) createPostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
 	fmt.Println("Debug: ", c.url+"/?function="+functionName)
 	request, err := http.NewRequest(http.MethodPost, c.url+"/?function="+functionName, bytes.NewBuffer(apiFunction))

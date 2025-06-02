@@ -1,7 +1,22 @@
 package api
 
+import (
+	"encoding/json"
+	"log"
+)
+
 type genericFunctionBody struct {
 	Function string `json:"function"`
+}
+
+func createGenericFunctionBody(function string) []byte {
+	body, err := json.Marshal(genericFunctionBody{
+		Function: function,
+	})
+	if err != nil {
+		log.Fatal(err) // If we can't marshal a post request body, whole thing is f*cked, so panic.
+	}
+	return body
 }
 
 const HealthCheckFunction = "HealthCheck"
