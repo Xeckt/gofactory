@@ -49,11 +49,15 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 		return nil, err
 	}
 
-	tokenResponse, err := CreateAndSendPostRequest[LoginResponse](ctx, c, PasswordlessLoginFunction, functionBody)
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+
+	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordlessLoginFunction, functionBody)
 	if err != nil {
 		return nil, err
 	}
-
+	c.currentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }
 
@@ -70,10 +74,14 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 		return nil, err
 	}
 
-	tokenResponse, err := CreateAndSendPostRequest[LoginResponse](ctx, c, PasswordLoginFunction, functionBody)
+	headers := map[string]string{
+		"Content-Type": "application/json",
+	}
+
+	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordLoginFunction, functionBody)
 	if err != nil {
 		return nil, err
 	}
-
+	c.currentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }
