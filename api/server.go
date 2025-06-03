@@ -67,7 +67,7 @@ func (c *GoFactoryClient) QueryServerState(ctx context.Context) (*QueryServerSta
 
 type SetAutoLoadSessionRequest struct {
 	Function string                        `json:"function"`
-	Data     SetAutoLoadSessionRequestData `json:"data,omitempty"`
+	Data     SetAutoLoadSessionRequestData `json:"data"`
 }
 
 type SetAutoLoadSessionRequestData struct {
@@ -85,6 +85,38 @@ func (c *GoFactoryClient) SetAutoLoadSessionName(ctx context.Context, sessionNam
 		return false, err
 	}
 	request, err := c.CreatePostRequest(SetAutoLoadSessionNameFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	err = c.SendPostRequest(ctx, request, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+type RunCommandRequest struct {
+	Function string                `json:"function"`
+	Data     RunCommandRequestData `json:"data,omitempty"`
+}
+
+type RunCommandRequestData struct {
+	Command string `json:"command"`
+}
+
+func (c *GoFactoryClient) RunServerCommand(ctx context.Context, command string) (bool, error) {
+	functionBody, err := json.Marshal(RunCommandRequest{
+		Function: RunCommandFunction,
+		Data: RunCommandRequestData{
+			Command: command,
+		},
+	})
+	if err != nil {
+		return false, err
+	}
+	request, err := c.CreatePostRequest(RunCommandFunction, functionBody)
 	if err != nil {
 		return false, err
 	}
