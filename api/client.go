@@ -5,8 +5,6 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
-	"fmt"
-	"io"
 	"log"
 	"net/http"
 )
@@ -74,13 +72,6 @@ func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Req
 		}
 		return &apiError, nil
 	}
-
-	responseBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Println(string(responseBytes))
 
 	return nil, json.NewDecoder(resp.Body).Decode(response)
 }

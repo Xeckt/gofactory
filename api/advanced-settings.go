@@ -19,15 +19,16 @@ type AdvancedGameSettings struct {
 	FlightMode                      string `json:"FG.PlayerRules.FlightMode,omitempty"`
 }
 
-type ApplyAdvancedGameSettingsRequest struct {
-	Function string               `json:"function,omitempty"`
-	Data     AdvancedGameSettings `json:"appliedAdvancedGameSettings,omitempty"`
+type AdvancedGameSettingsData struct {
+	Data AdvancedGameSettingsResponse `json:"data,omitempty"`
 }
 
 type AdvancedGameSettingsResponse struct {
-	Data struct {
-		Settings AdvancedGameSettings `json:"AppliedAdvancedGameSettings,omitempty"`
-	} `json:"data,omitempty"`
+	Settings AdvancedGameSettings `json:"appliedAdvancedGameSettings,omitempty"`
+}
+type ApplyAdvancedGameSettingsRequest struct {
+	Function string               `json:"function"`
+	Data     AdvancedGameSettings `json:"appliedAdvancedGameSettings"`
 }
 
 func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AdvancedGameSettings, error) {
@@ -37,7 +38,7 @@ func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*Advance
 	if err != nil {
 		return nil, err
 	}
-	return &appliedAdvanceSettingsResponse.Data.Settings, nil
+	return &appliedAdvanceSettingsResponse.Settings, nil
 }
 
 func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, settings AdvancedGameSettings) (bool, error) {

@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 const NOT_AUTHENTICATED_PRIVILEGE string = "NotAuthenticated"
@@ -12,22 +13,22 @@ const INITIAL_ADMIN_PRIVILEGE string = "InitialAdmin"
 const API_TOKEN_PRIVILEGE string = "ApiToken"
 
 type PasswordlessLoginRequest struct {
-	Function string                       `json:"function,omitempty"`
-	Data     PasswordlessLoginRequestData `json:"data,omitempty"`
+	Function string                       `json:"function"`
+	Data     PasswordlessLoginRequestData `json:"data"`
 }
 
 type PasswordLoginRequest struct {
-	Function string                   `json:"function,omitempty"`
-	Data     PasswordLoginRequestData `json:"data,omitempty"`
+	Function string                   `json:"function"`
+	Data     PasswordLoginRequestData `json:"data"`
 }
 
 type PasswordLoginRequestData struct {
-	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel,omitempty"`
-	Password              string `json:"password,omitempty"`
+	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel"`
+	Password              string `json:"password"`
 }
 
 type PasswordlessLoginRequestData struct {
-	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel,omitempty"`
+	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel"`
 }
 
 type LoginResponse struct {
@@ -55,8 +56,10 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 
 	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordlessLoginFunction, functionBody)
 	if err != nil {
+		fmt.Println("Error is here", tokenResponse, err)
 		return nil, err
 	}
+
 	c.CurrentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }

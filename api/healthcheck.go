@@ -19,8 +19,8 @@ type HealthCheckCustomData struct {
 }
 
 type HealthCheckRequest struct {
-	Function string                `json:"function,omitempty"`
-	Data     HealthCheckCustomData `json:"data,omitempty"`
+	Function string                `json:"function"`
+	Data     HealthCheckCustomData `json:"data"`
 }
 
 func (c *GoFactoryClient) GetServerHealth(ctx context.Context, customData string) (*HealthCheckResponse, error) {
