@@ -17,11 +17,11 @@ So, if you wish to take the API library and use it for yourself, you can do so.
 - [ ] Various support for handling secrets
 
 ### API Library 
-- [ ] Full integration with the Satisfactory v1 API
+- [x] Full integration with the Satisfactory v1 API
 - [ ] Async focused
-- [ ] Convenient helper functions
+- [x] Convenient helper functions
 - [ ] Rate limiting
-- [ ] Strongly typed
+- [x] Strongly typed
 
 ## Current state
 
