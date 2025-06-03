@@ -3,8 +3,9 @@ package api
 import "fmt"
 
 type APIError struct {
-	StatusCode string `json:"errorCode"`
-	Message    string `json:"errorMessage"`
+	StatusCode string      `json:"errorCode"`
+	Message    string      `json:"errorMessage"`
+	Data       interface{} `json:"errorData,omitempty"`
 }
 
 func (e *APIError) Error() string {
