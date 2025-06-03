@@ -1,6 +1,6 @@
 # GoFactory
 
-<img src="./logo.png" width=250 height =250>
+<img src="./logo.png" width=250 height =250 alt="_">
 
 GoFactory is a (planned) cross-platform CLI tool to interact with your Satisfactory dedicated server, locally or remotely via API.
 
