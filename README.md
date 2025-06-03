@@ -18,11 +18,15 @@ So, if you wish to take the API library and use it for yourself, you can do so.
 
 ### API Library 
 - [x] Full integration with the Satisfactory v1 API
-- [ ] Async focused
+- [x] Goroutine compatible (contexts)
 - [x] Convenient helper functions
-- [ ] Rate limiting
+- [ ] Rate limiting (To be discussed)
 - [x] Strongly typed
 
 ## Current state
 
-Project has only just started so it is not in a workable state at the moment.
+The API library is ready and usable, though it is still in development and hasn't released in a major version yet so
+use at your own risk:
+```bash
+go get github.com/xeckt/gofactory/api
+```
