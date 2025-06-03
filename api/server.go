@@ -33,26 +33,26 @@ type ApplyServerOptionsRequestData struct {
 	ServerOptions ServerOptions `json:"updatedServerOptions,omitempty"`
 }
 
-func (c *GoFactoryClient) ApplyServerOptions(ctx context.Context, options ServerOptions) (bool, error) {
+func (c *GoFactoryClient) ApplyServerOptions(ctx context.Context, options ServerOptions) error {
 	functionBody, err := json.Marshal(ApplyServerOptionsRequest{
 		Function: ApplyAdvancedGameSettingsFunction,
 		Data:     ApplyServerOptionsRequestData{ServerOptions: options},
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	request, err := c.CreatePostRequest(ApplyServerOptionsFunction, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	err = c.SendPostRequest(ctx, request, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
 func (c *GoFactoryClient) GetServerOptions(ctx context.Context) (*GetServerOptionsData, error) {
@@ -137,7 +137,7 @@ type RunCommandRequestData struct {
 	Command string `json:"command"`
 }
 
-func (c *GoFactoryClient) RunServerCommand(ctx context.Context, command string) (bool, error) {
+func (c *GoFactoryClient) RunServerCommand(ctx context.Context, command string) error {
 	functionBody, err := json.Marshal(RunCommandRequest{
 		Function: RunCommandFunction,
 		Data: RunCommandRequestData{
@@ -145,33 +145,33 @@ func (c *GoFactoryClient) RunServerCommand(ctx context.Context, command string) 
 		},
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 	request, err := c.CreatePostRequest(RunCommandFunction, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	err = c.SendPostRequest(ctx, request, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
 
-func (c *GoFactoryClient) ShutdownServer(ctx context.Context) (bool, error) {
+func (c *GoFactoryClient) ShutdownServer(ctx context.Context) error {
 	functionBody := CreateGenericFunctionBody(ShutdownFunction)
 
 	request, err := c.CreatePostRequest(ShutdownFunction, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	err = c.SendPostRequest(ctx, request, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }

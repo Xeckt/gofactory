@@ -14,7 +14,7 @@ type RenameRequestData struct {
 	ServerName string `json:"serverName,omitempty"`
 }
 
-func (c *GoFactoryClient) RenameServer(ctx context.Context, serverName string) (bool, error) {
+func (c *GoFactoryClient) RenameServer(ctx context.Context, serverName string) error {
 	functionBody, err := json.Marshal(RenameRequest{
 		Function: RenameServerFunction,
 		Data: RenameRequestData{
@@ -22,20 +22,20 @@ func (c *GoFactoryClient) RenameServer(ctx context.Context, serverName string) (
 		},
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	req, err := c.CreatePostRequest(RenameServerFunction, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	var apiError APIError
 	err = c.SendPostRequest(ctx, req, &apiError)
 
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }

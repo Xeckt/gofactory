@@ -20,10 +20,10 @@ type AdvancedGameSettings struct {
 }
 
 type AdvancedGameSettingsData struct {
-	Data AdvancedGameSettingsResponse `json:"data,omitempty"`
+	Data AppliedAdvancedGameSettings `json:"data,omitempty"`
 }
 
-type AdvancedGameSettingsResponse struct {
+type AppliedAdvancedGameSettings struct {
 	Settings AdvancedGameSettings `json:"appliedAdvancedGameSettings,omitempty"`
 }
 type ApplyAdvancedGameSettingsRequest struct {
@@ -32,7 +32,7 @@ type ApplyAdvancedGameSettingsRequest struct {
 }
 
 func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AdvancedGameSettings, error) {
-	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](ctx, c,
+	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AppliedAdvancedGameSettings](ctx, c,
 		GetAdvancedGameSettingsFunction,
 		CreateGenericFunctionBody(GetAdvancedGameSettingsFunction))
 	if err != nil {
@@ -41,22 +41,28 @@ func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*Advance
 	return &appliedAdvanceSettingsResponse.Settings, nil
 }
 
-func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, settings AdvancedGameSettings) (bool, error) {
+func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, settings AdvancedGameSettings) error {
 	functionBody, err := json.Marshal(ApplyAdvancedGameSettingsRequest{
 		Function: ApplyAdvancedGameSettingsFunction,
 		Data:     settings,
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 	request, err := c.CreatePostRequest(ApplyAdvancedGameSettingsFunction, functionBody)
 	if err != nil {
-		return false, err
-	}
-	err = c.SendPostRequest(ctx, request, functionBody)
-	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	var apiError APIError
+	err = c.SendPostRequest(ctx, request, &apiError)
+	if err != nil {
+		return err
+	}
+
+	if apiError != (APIError{}) {
+		return &apiError
+	}
+
+	return nil
 }

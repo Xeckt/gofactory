@@ -24,9 +24,9 @@ type ClaimResponseData struct {
 	AuthenticationToken string `json:"authenticationToken,omitempty"`
 }
 
-func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimRequestData) (bool, error) {
+func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimRequestData) error {
 	if c.CurrentPrivilege != INITIAL_ADMIN_PRIVILEGE {
-		return false, fmt.Errorf("privilege must be set to %s in order to claim the server", INITIAL_ADMIN_PRIVILEGE)
+		return fmt.Errorf("privilege must be set to %s in order to claim the server", INITIAL_ADMIN_PRIVILEGE)
 	}
 
 	functionBody, err := json.Marshal(ClaimRequest{
@@ -34,21 +34,21 @@ func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimReques
 		Data:     claimData,
 	})
 	if err != nil {
-		return false, err
+		return err
 	}
 	newToken, err := CreateAndSendPostRequest[ClaimResponse](ctx, c, ClaimServerFunction, functionBody)
 	if err != nil {
-		return false, err
+		return err
 	}
 	if newToken == nil {
-		return false, fmt.Errorf("new authentication Token returned is empty")
+		return fmt.Errorf("new authentication Token returned is empty")
 	}
 	c.Token = newToken.Data.AuthenticationToken
 
 	_, err = c.QueryServerState(ctx)
 	if err != nil {
-		return false, err
+		return err
 	}
 
-	return true, nil
+	return nil
 }
