@@ -1,6 +1,9 @@
 package api
 
-import "fmt"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 type APIError struct {
 	StatusCode string      `json:"errorCode"`
@@ -10,7 +13,14 @@ type APIError struct {
 
 func (e *APIError) Error() string {
 	if e.StatusCode == "invalid_token" {
-		return fmt.Sprintf("Invalid token for the Satisfactory API: %s", e.Message)
+		return fmt.Sprintf("API Error - Invalid token for the Satisfactory API: %s", e.Message)
 	}
-	return fmt.Sprintf("%s: %s", e.StatusCode, e.Message)
+	if e.Data != nil {
+		b, err := json.MarshalIndent(e.Data, "", "  ")
+		if err != nil {
+			return err.Error()
+		}
+		return fmt.Sprintf("API error - Status code: %s\nAPI error - Message: %s\nData: %s\n", string(b))
+	}
+	return fmt.Sprintf("API error - Status code: %s\nAPI error - Message: %s", e.StatusCode, e.Message)
 }
