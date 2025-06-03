@@ -57,7 +57,7 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 	if err != nil {
 		return nil, err
 	}
-	c.currentPrivilege = privilege
+	c.CurrentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }
 
@@ -82,6 +82,6 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 	if err != nil {
 		return nil, err
 	}
-	c.currentPrivilege = privilege
+	c.CurrentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }

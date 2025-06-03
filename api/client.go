@@ -14,19 +14,19 @@ import (
 const Version = "0.2.0"
 
 type GoFactoryClient struct {
-	url              string
-	token            string
-	currentPrivilege string
-	client           *http.Client
+	URL              string
+	Token            string
+	CurrentPrivilege string
+	Client           *http.Client
 }
 
 type ApiResponse interface{}
 
 func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryClient {
 	return &GoFactoryClient{
-		url:   url,
-		token: token,
-		client: &http.Client{
+		URL:   url,
+		Token: token,
+		Client: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			},
@@ -35,19 +35,19 @@ func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryCli
 }
 
 func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
-	request, err := http.NewRequest(http.MethodPost, c.url+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
+	request, err := http.NewRequest(http.MethodPost, c.URL+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
 	if err != nil {
 		return nil, err
 	}
 
-	request.Header.Set("Authorization", "Bearer "+c.token)
+	request.Header.Set("Authorization", "Bearer "+c.Token)
 	request.Header.Add("Content-Type", "application/json")
 
 	return request, nil
 }
 
 func (c *GoFactoryClient) CreatePostRequestWithHeaders(headers map[string]string, functionName string, apiFunction []byte) (*http.Request, error) {
-	request, err := http.NewRequest(http.MethodPost, c.url+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
+	request, err := http.NewRequest(http.MethodPost, c.URL+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,7 @@ func (c *GoFactoryClient) CreatePostRequestWithHeaders(headers map[string]string
 }
 
 func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Request, response ApiResponse) (*APIError, error) {
-	resp, err := c.client.Do(request.WithContext(ctx))
+	resp, err := c.Client.Do(request.WithContext(ctx))
 	if err != nil {
 		log.Fatal(err)
 	}

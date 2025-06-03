@@ -13,7 +13,7 @@ type APIError struct {
 
 func (e *APIError) Error() string {
 	if e.StatusCode == "invalid_token" {
-		return fmt.Sprintf("API Error - Invalid token for the Satisfactory API: %s", e.Message)
+		return fmt.Sprintf("API Error - Invalid Token for the Satisfactory API: %s", e.Message)
 	}
 	if e.Data != nil {
 		b, err := json.MarshalIndent(e.Data, "", "  ")
