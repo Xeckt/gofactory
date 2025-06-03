@@ -24,6 +24,37 @@ type ServerOptions struct {
 	NetworkQuality        string `json:"FG.NetworkQuality,omitempty"`
 }
 
+type ApplyServerOptionsRequest struct {
+	Function string                        `json:"function"`
+	Data     ApplyServerOptionsRequestData `json:"data,omitempty"`
+}
+
+type ApplyServerOptionsRequestData struct {
+	ServerOptions ServerOptions `json:"updatedServerOptions,omitempty"`
+}
+
+func (c *GoFactoryClient) ApplyServerOptions(ctx context.Context, options ServerOptions) (bool, error) {
+	functionBody, err := json.Marshal(ApplyServerOptionsRequest{
+		Function: ApplyAdvancedGameSettingsFunction,
+		Data:     ApplyServerOptionsRequestData{ServerOptions: options},
+	})
+	if err != nil {
+		return false, err
+	}
+
+	request, err := c.CreatePostRequest(ApplyServerOptionsFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	err = c.SendPostRequest(ctx, request, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
 func (c *GoFactoryClient) GetServerOptions(ctx context.Context) (*GetServerOptionsData, error) {
 
 	optionsResponse, err := CreateAndSendPostRequest[GetServerOptionsResponse](ctx, c,
