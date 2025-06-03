@@ -1,8 +1,11 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"mime/multipart"
 )
 
 type CreateNewGameRequest struct {
@@ -226,6 +229,70 @@ func (c *GoFactoryClient) LoadGame(ctx context.Context, saveName string, enableA
 	}
 
 	req, err := c.CreatePostRequest(LoadGameFunction, functionBody)
+	if err != nil {
+		return err
+	}
+
+	var apiError APIError
+	err = c.SendPostRequest(ctx, req, &apiError)
+	if err != nil {
+		return err
+	}
+
+	if apiError != (APIError{}) {
+		return &apiError
+	}
+
+	return nil
+}
+
+type UploadSaveGameRequest struct {
+	Data     UploadSaveGameData `json:"data"`
+	SaveFile bytes.Buffer       `json:"saveGameFile"`
+}
+
+type UploadSaveGameData struct {
+	Function string                    `json:"function"`
+	SaveData UploadSaveGameDataRequest `json:"data"`
+}
+
+type UploadSaveGameDataRequest struct {
+	SaveName                  string `json:"saveName"`
+	LoadImmediately           bool   `json:"loadSaveGame"`
+	EnableAdvanceGameSettings bool   `json:"enableAdvanceGameSettings"`
+}
+
+func (c *GoFactoryClient) UploadSaveGame(ctx context.Context, fileStream io.Reader, filename string, saveData UploadSaveGameDataRequest) error {
+	var bodyBuffer bytes.Buffer
+	multipartWriter := multipart.NewWriter(&bodyBuffer)
+	defer multipartWriter.Close()
+
+	fileWriter, err := multipartWriter.CreateFormFile("save", filename)
+	if err != nil {
+		return err
+	}
+
+	_, err = io.Copy(fileWriter, fileStream)
+	if err != nil {
+		return err
+	}
+
+	headers := map[string]string{
+		"Content-Type": multipartWriter.FormDataContentType(),
+	}
+
+	functionBody, err := json.Marshal(UploadSaveGameRequest{
+		Data: UploadSaveGameData{
+			Function: UploadSaveGameFunction,
+			SaveData: saveData,
+		},
+		SaveFile: bodyBuffer,
+	})
+	if err != nil {
+		return err
+	}
+
+	req, err := c.CreatePostRequestWithHeaders(headers, UploadSaveGameFunction, functionBody)
 	if err != nil {
 		return err
 	}
