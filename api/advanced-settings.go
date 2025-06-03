@@ -49,6 +49,7 @@ func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, setting
 	if err != nil {
 		return err
 	}
+
 	request, err := c.CreatePostRequest(ApplyAdvancedGameSettingsFunction, functionBody)
 	if err != nil {
 		return err
