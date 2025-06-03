@@ -309,3 +309,42 @@ func (c *GoFactoryClient) UploadSaveGame(ctx context.Context, fileStream io.Read
 
 	return nil
 }
+
+type DownloadSaveGameRequest struct {
+	Function string                      `json:"function"`
+	Data     DownloadSaveGameRequestData `json:"data"`
+}
+
+type DownloadSaveGameRequestData struct {
+	SaveName string `json:"saveName"`
+}
+
+func (c *GoFactoryClient) DownloadSaveGame(ctx context.Context, saveName string) ([]byte, error) {
+	functionBody, err := json.Marshal(DownloadSaveGameRequest{
+		Function: DownloadSaveGameFunction,
+		Data: DownloadSaveGameRequestData{
+			SaveName: saveName,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := c.CreatePostRequest(DownloadSaveGameFunction, functionBody)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.Client.Do(req.WithContext(ctx))
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	fileStream, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return fileStream, nil
+}
