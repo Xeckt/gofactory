@@ -42,7 +42,6 @@ func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*Advance
 }
 
 func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, settings AdvancedGameSettings) (bool, error) {
-	// Function doesn't reply with a body of info just status code, so handle this specifically.
 	functionBody, err := json.Marshal(ApplyAdvancedGameSettingsRequest{
 		Function: ApplyAdvancedGameSettingsFunction,
 		Data:     settings,
@@ -58,5 +57,6 @@ func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, setting
 	if err != nil {
 		return false, err
 	}
+
 	return true, nil
 }
