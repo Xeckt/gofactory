@@ -43,7 +43,7 @@ func main() {
 
     client := api.NewGoFactoryClient(url, token, true)
 	
-    err := client.PasswordlessLogin(context.Background())
+    err := client.PasswordlessLogin(context.Background(), api.INITIAL_ADMIN_PRIVILEGE)
     if err != nil {
         log.Fatal(err)
     }
