@@ -128,3 +128,19 @@ func (c *GoFactoryClient) RunServerCommand(ctx context.Context, command string) 
 
 	return true, nil
 }
+
+func (c *GoFactoryClient) ShutdownServer(ctx context.Context) (bool, error) {
+	functionBody := CreateGenericFunctionBody(ShutdownFunction)
+
+	request, err := c.CreatePostRequest(ShutdownFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	err = c.SendPostRequest(ctx, request, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
