@@ -1,8 +1,11 @@
 package api
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+)
 
-type AppliedAdvancedGameSettings struct {
+type AdvancedGameSettings struct {
 	NoPower                         string `json:"FG.GameRules.NoPower,omitempty"`
 	StartingTier                    string `json:"FG.GameRules.StartingTier,omitempty"`
 	DisableArachnidCreatures        string `json:"FG.GameRules.DisableArachnidCreatures,omitempty"`
@@ -16,13 +19,18 @@ type AppliedAdvancedGameSettings struct {
 	FlightMode                      string `json:"FG.PlayerRules.FlightMode,omitempty"`
 }
 
+type ApplyAdvancedGameSettingsRequest struct {
+	Function string               `json:"function,omitempty"`
+	Data     AdvancedGameSettings `json:"appliedAdvancedGameSettings,omitempty"`
+}
+
 type AdvancedGameSettingsResponse struct {
 	Data struct {
-		Settings AppliedAdvancedGameSettings `json:"AppliedAdvancedGameSettings,omitempty"`
+		Settings AdvancedGameSettings `json:"AppliedAdvancedGameSettings,omitempty"`
 	} `json:"data,omitempty"`
 }
 
-func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AppliedAdvancedGameSettings, error) {
+func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AdvancedGameSettings, error) {
 	appliedAdvanceSettingsResponse, err := CreateAndSendPostRequest[AdvancedGameSettingsResponse](ctx, c,
 		GetAdvancedGameSettingsFunction,
 		CreateGenericFunctionBody(GetAdvancedGameSettingsFunction))
@@ -30,4 +38,27 @@ func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*Applied
 		return nil, err
 	}
 	return &appliedAdvanceSettingsResponse.Data.Settings, nil
+}
+
+func (c *GoFactoryClient) ApplyAdvancedGameSettings(ctx context.Context, settings AdvancedGameSettings) (bool, error) {
+	// Function doesn't reply with a body of info just status code, so handle this specifically.
+	functionBody, err := json.Marshal(ApplyAdvancedGameSettingsRequest{
+		Function: ApplyAdvancedGameSettingsFunction,
+		Data:     settings,
+	})
+	if err != nil {
+		return false, err
+	}
+	request, err := c.CreatePostRequest(ApplyAdvancedGameSettingsFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+	apiErr, err := c.SendPostRequest(ctx, request, functionBody)
+	if err != nil {
+		return false, err
+	}
+	if apiErr != nil {
+		return false, apiErr
+	}
+	return true, nil
 }
