@@ -57,7 +57,7 @@ func (c *GoFactoryClient) CreatePostRequestWithHeaders(headers map[string]string
 	return request, nil
 }
 
-func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Request, response ApiResponse) (*APIError, error) {
+func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Request, response ApiResponse) error {
 	resp, err := c.Client.Do(request.WithContext(ctx))
 	if err != nil {
 		log.Fatal(err)
@@ -68,12 +68,16 @@ func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Req
 		var apiError APIError
 		err := json.NewDecoder(resp.Body).Decode(&apiError)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return &apiError, nil
+		return &apiError
 	}
 
-	return nil, json.NewDecoder(resp.Body).Decode(response)
+	if resp.StatusCode == 204 {
+		return nil
+	}
+
+	return json.NewDecoder(resp.Body).Decode(response)
 }
 
 func CreateAndSendPostRequest[Resp any](ctx context.Context, c *GoFactoryClient, functionName string, apiFunction []byte) (*Resp, error) {
@@ -82,12 +86,9 @@ func CreateAndSendPostRequest[Resp any](ctx context.Context, c *GoFactoryClient,
 		return nil, err
 	}
 	var resp Resp
-	apiError, err := c.SendPostRequest(ctx, request, &resp)
+	err = c.SendPostRequest(ctx, request, &resp)
 	if err != nil {
 		return nil, err
-	}
-	if apiError != nil {
-		return nil, apiError
 	}
 	return &resp, nil
 }
@@ -98,12 +99,10 @@ func CreateAndSendPostRequestWithHeaders[Resp any](ctx context.Context, c *GoFac
 		return nil, err
 	}
 	var resp Resp
-	apiError, err := c.SendPostRequest(ctx, request, &resp)
+	err = c.SendPostRequest(ctx, request, &resp)
 	if err != nil {
 		return nil, err
 	}
-	if apiError != nil {
-		return nil, apiError
-	}
+
 	return &resp, nil
 }
