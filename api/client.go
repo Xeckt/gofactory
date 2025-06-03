@@ -19,13 +19,13 @@ type GoFactoryClient struct {
 
 type ApiResponse interface{}
 
-func NewGoFactoryClient(url string, token string) *GoFactoryClient {
+func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryClient {
 	return &GoFactoryClient{
 		url:   url,
 		token: token,
 		client: &http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			},
 		},
 	}
