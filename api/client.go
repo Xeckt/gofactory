@@ -62,7 +62,11 @@ func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Req
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if berr := resp.Body.Close(); err != nil {
+			err = berr
+		}
+	}()
 
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
 		var apiError APIError
