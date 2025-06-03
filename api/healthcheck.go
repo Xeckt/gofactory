@@ -6,21 +6,21 @@ import (
 )
 
 type HealthCheckResponse struct {
-	Health     string `json:"health"`
-	CustomData string `json:"serverCustomData"`
+	Health     string `json:"health,omitempty"`
+	CustomData string `json:"serverCustomData,omitempty"`
 }
 
 type HealthCheckResponseData struct {
-	Data HealthCheckResponse `json:"data"`
+	Data HealthCheckResponse `json:"data,omitempty"`
 }
 
 type HealthCheckCustomData struct {
-	CustomData string `json:"clientCustomData"`
+	CustomData string `json:"clientCustomData,omitempty"`
 }
 
 type HealthCheckRequest struct {
-	Function string                `json:"function"`
-	Data     HealthCheckCustomData `json:"data"`
+	Function string                `json:"function,omitempty"`
+	Data     HealthCheckCustomData `json:"data,omitempty"`
 }
 
 func (c *GoFactoryClient) GetServerHealth(ctx context.Context, customData string) (*HealthCheckResponse, error) {

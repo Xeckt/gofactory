@@ -3,23 +3,23 @@ package api
 import "context"
 
 type AppliedAdvancedGameSettings struct {
-	NoPower                         string `json:"FG.GameRules.NoPower"`
-	StartingTier                    string `json:"FG.GameRules.StartingTier"`
-	DisableArachnidCreatures        string `json:"FG.GameRules.DisableArachnidCreatures"`
-	NoUnlockCost                    string `json:"FG.GameRules.NoUnlockCost"`
-	SetGamePhase                    string `json:"FG.GameRules.SetGamePhase"`
-	UnlockAllResearchSchematics     string `json:"FG.GameRules.UnlockAllResearchSchematics"`
-	UnlockInstantAltRecipes         string `json:"FG.GameRules.UnlockInstantAltRecipes"`
-	UnlockAllResourceSinkSchematics string `json:"FG.GameRules.UnlockAllResourceSinkSchematics"`
-	NoBuildCost                     string `json:"FG.PlayerRules.NoBuildCost"`
-	GodMode                         string `json:"FG.PlayerRules.GodMode"`
-	FlightMode                      string `json:"FG.PlayerRules.FlightMode"`
+	NoPower                         string `json:"FG.GameRules.NoPower,omitempty"`
+	StartingTier                    string `json:"FG.GameRules.StartingTier,omitempty"`
+	DisableArachnidCreatures        string `json:"FG.GameRules.DisableArachnidCreatures,omitempty"`
+	NoUnlockCost                    string `json:"FG.GameRules.NoUnlockCost,omitempty"`
+	SetGamePhase                    string `json:"FG.GameRules.SetGamePhase,omitempty"`
+	UnlockAllResearchSchematics     string `json:"FG.GameRules.UnlockAllResearchSchematics,omitempty"`
+	UnlockInstantAltRecipes         string `json:"FG.GameRules.UnlockInstantAltRecipes,omitempty"`
+	UnlockAllResourceSinkSchematics string `json:"FG.GameRules.UnlockAllResourceSinkSchematics,omitempty"`
+	NoBuildCost                     string `json:"FG.PlayerRules.NoBuildCost,omitempty"`
+	GodMode                         string `json:"FG.PlayerRules.GodMode,omitempty"`
+	FlightMode                      string `json:"FG.PlayerRules.FlightMode,omitempty"`
 }
 
 type AdvancedGameSettingsResponse struct {
 	Data struct {
-		Settings AppliedAdvancedGameSettings `json:"AppliedAdvancedGameSettings"`
-	} `json:"data"`
+		Settings AppliedAdvancedGameSettings `json:"AppliedAdvancedGameSettings,omitempty"`
+	} `json:"data,omitempty"`
 }
 
 func (c *GoFactoryClient) GetAdvancedGameSettings(ctx context.Context) (*AppliedAdvancedGameSettings, error) {
