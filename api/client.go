@@ -14,7 +14,7 @@ const Version = "0.3.1"
 type GoFactoryClient struct {
 	URL              string
 	Token            string
-	CurrentPrivilege string
+	currentPrivilege string
 	Client           *http.Client
 }
 

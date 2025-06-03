@@ -39,15 +39,15 @@ type PasswordLoginResponseData struct {
 	AuthToken string `json:"authenticationToken,omitempty"`
 }
 
-func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege string) (*PasswordLoginResponseData, error) {
+func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context) error {
 	functionBody, err := json.Marshal(PasswordlessLoginRequest{
 		Function: PasswordlessLoginFunction,
 		Data: PasswordlessLoginRequestData{
-			MinimumPrivilegeLevel: privilege,
+			MinimumPrivilegeLevel: INITIAL_ADMIN_PRIVILEGE,
 		},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	headers := map[string]string{
@@ -57,11 +57,12 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordlessLoginFunction, functionBody)
 	if err != nil {
 		fmt.Println("Error is here", tokenResponse, err)
-		return nil, err
+		return err
 	}
 
-	c.CurrentPrivilege = privilege
-	return &tokenResponse.Data, nil
+	c.currentPrivilege = INITIAL_ADMIN_PRIVILEGE
+	c.Token = tokenResponse.Data.AuthToken
+	return nil
 }
 
 func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, password string) (*PasswordLoginResponseData, error) {
@@ -85,7 +86,7 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 	if err != nil {
 		return nil, err
 	}
-	c.CurrentPrivilege = privilege
+	c.currentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }
 

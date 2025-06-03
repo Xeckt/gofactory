@@ -25,7 +25,7 @@ type ClaimResponseData struct {
 }
 
 func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimRequestData) error {
-	if c.CurrentPrivilege != INITIAL_ADMIN_PRIVILEGE {
+	if c.currentPrivilege != INITIAL_ADMIN_PRIVILEGE {
 		return fmt.Errorf("privilege must be set to %s in order to claim the server", INITIAL_ADMIN_PRIVILEGE)
 	}
 
@@ -43,7 +43,9 @@ func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimReques
 	if newToken == nil {
 		return fmt.Errorf("new authentication Token returned is empty")
 	}
+
 	c.Token = newToken.Data.AuthenticationToken
+	c.currentPrivilege = ADMINISTRATOR_PRIVILEGE
 
 	_, err = c.QueryServerState(ctx)
 	if err != nil {
