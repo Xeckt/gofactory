@@ -27,7 +27,7 @@ and make it as available as possible for users & developers alike.
 Use `go fmt` to ensure consistent formatting.
 
 ### Lint your code
-Use `golangci-lint` or `go vet` to catch potential issues:
+Use `golangci-lint` or `go vet` to catch potential issues
 
 ### Code style
 Code style here is not too strict, I like to allow as much room for anything here.
