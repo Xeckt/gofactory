@@ -26,7 +26,4 @@ So, if you wish to take the API library and use it for yourself, you can do so.
 ## Current state
 
 The API library is ready and usable, though it is still in development and hasn't released in a major version yet so
-use at your own risk:
-```bash
-go get github.com/xeckt/gofactory/api
-```
+use at your own risk, see [API MD file](./API.md)
