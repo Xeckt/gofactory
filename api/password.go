@@ -88,3 +88,75 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 	c.CurrentPrivilege = privilege
 	return &tokenResponse.Data, nil
 }
+
+type ClientPasswordRequest struct {
+	Function string                    `json:"function,omitempty"`
+	Data     ClientPasswordRequestData `json:"data,omitempty"`
+}
+
+type ClientPasswordRequestData struct {
+	Password string `json:"password,omitempty"`
+}
+
+func (c *GoFactoryClient) SetClientPassword(ctx context.Context, newPassword string) (bool, error) {
+	functionBody, err := json.Marshal(ClientPasswordRequest{
+		Function: SetClientPasswordFunction,
+		Data: ClientPasswordRequestData{
+			Password: newPassword,
+		},
+	})
+	if err != nil {
+		return false, err
+	}
+
+	req, err := c.CreatePostRequest(SetClientPasswordFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	var apiError APIError
+	err = c.SendPostRequest(ctx, req, &apiError)
+
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+type AdminPasswordRequest struct {
+	Function string                   `json:"function,omitempty"`
+	Data     AdminPasswordRequestData `json:"data,omitempty"`
+}
+
+type AdminPasswordRequestData struct {
+	Password string `json:"password,omitempty"`
+}
+
+type AdminPasswordResponseData struct {
+	Data AdminPasswordResponse `json:"data,omitempty"`
+}
+
+type AdminPasswordResponse struct {
+	AuthToken string `json:"authenticationToken,omitempty"`
+}
+
+func (c *GoFactoryClient) SetAdminPassword(ctx context.Context, newPassword string) (bool, error) {
+	functionBody, err := json.Marshal(AdminPasswordRequest{
+		Function: SetAdminPasswordFunction,
+		Data: AdminPasswordRequestData{
+			Password: newPassword,
+		},
+	})
+	if err != nil {
+		return false, err
+	}
+
+	resp, err := CreateAndSendPostRequest[AdminPasswordResponseData](ctx, c, SetAdminPasswordFunction, functionBody)
+	if err != nil {
+		return false, err
+	}
+
+	c.Token = resp.Data.AuthToken
+	return true, nil
+}
