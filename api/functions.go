@@ -5,64 +5,96 @@ import (
 	"log"
 )
 
+// genericFunctionBody represents a simple JSON body containing
+// only the function name to call in the Satisfactory server API.
 type genericFunctionBody struct {
 	Function string `json:"function"`
 }
 
+// CreateGenericFunctionBody marshals the specified function name
+// into a JSON-encoded body for API requests. Specifically used
+// with POST requests that require no additional parameters.
 func CreateGenericFunctionBody(function string) []byte {
 	body, err := json.Marshal(genericFunctionBody{
 		Function: function,
 	})
 	if err != nil {
-		log.Fatal(err) // If we can't marshal a post request body, whole thing is f*cked, so panic.
+		log.Fatal(err)
 	}
 	return body
 }
 
-const HealthCheckFunction = "HealthCheck"
+// String constants representing API function names used by the Satisfactory dedicated server API.
+const (
+	// HealthCheckFunction is the API function name for the server health check.
+	HealthCheckFunction = "HealthCheck"
 
-const VerifyAuthTokenFunction = "VerifyAuthenticationToken"
+	// VerifyAuthTokenFunction verifies the provided authentication token.
+	VerifyAuthTokenFunction = "VerifyAuthenticationToken"
 
-const PasswordlessLoginFunction = "PasswordlessLogin"
+	// PasswordlessLoginFunction initiates passwordless login for the client.
+	PasswordlessLoginFunction = "PasswordlessLogin"
 
-const PasswordLoginFunction = "PasswordLogin"
+	// PasswordLoginFunction initiates password-based login for the client.
+	PasswordLoginFunction = "PasswordLogin"
 
-const QueryServerStateFunction = "QueryServerState"
+	// QueryServerStateFunction queries the current state of the server.
+	QueryServerStateFunction = "QueryServerState"
 
-const GetServerOptionsFunction = "GetServerOptions"
+	// GetServerOptionsFunction retrieves the current server options.
+	GetServerOptionsFunction = "GetServerOptions"
 
-const GetAdvancedGameSettingsFunction = "GetAdvancedGameSettings"
+	// GetAdvancedGameSettingsFunction retrieves advanced game settings for the save file.
+	GetAdvancedGameSettingsFunction = "GetAdvancedGameSettings"
 
-const ApplyAdvancedGameSettingsFunction = "ApplyAdvancedGameSettings"
+	// ApplyAdvancedGameSettingsFunction applies advanced game settings to the save file.
+	ApplyAdvancedGameSettingsFunction = "ApplyAdvancedGameSettings"
 
-const ClaimServerFunction = "ClaimServer"
+	// ClaimServerFunction claims the server for administration.
+	ClaimServerFunction = "ClaimServer"
 
-const RenameServerFunction = "RenameServer"
+	// RenameServerFunction renames the server.
+	RenameServerFunction = "RenameServer"
 
-const SetClientPasswordFunction = "SetClientPassword"
+	// SetClientPasswordFunction sets the client password for joining the server.
+	SetClientPasswordFunction = "SetClientPassword"
 
-const SetAdminPasswordFunction = "SetAdminPassword"
+	// SetAdminPasswordFunction sets the administrator password for the server.
+	SetAdminPasswordFunction = "SetAdminPassword"
 
-const SetAutoLoadSessionNameFunction = "SetAutoLoadSessionName"
+	// SetAutoLoadSessionNameFunction sets the session name to auto-load on server startup.
+	SetAutoLoadSessionNameFunction = "SetAutoLoadSessionName"
 
-const RunCommandFunction = "RunCommand"
+	// RunCommandFunction executes a console command on the server.
+	RunCommandFunction = "RunCommand"
 
-const ShutdownFunction = "Shutdown"
+	// ShutdownFunction shuts down the Satisfactory server.
+	ShutdownFunction = "Shutdown"
 
-const ApplyServerOptionsFunction = "ApplyServerOptions"
+	// ApplyServerOptionsFunction applies new server options.
+	ApplyServerOptionsFunction = "ApplyServerOptions"
 
-const CreateNewGameFunction = "CreateNewGame"
+	// CreateNewGameFunction creates a new game session.
+	CreateNewGameFunction = "CreateNewGame"
 
-const SaveGameFunction = "SaveGame"
+	// SaveGameFunction saves the current game session.
+	SaveGameFunction = "SaveGame"
 
-const DeleteSaveFileFunction = "DeleteSaveFile"
+	// DeleteSaveFileFunction deletes a save file from the server.
+	DeleteSaveFileFunction = "DeleteSaveFile"
 
-const DeleteSaveSessionFunction = "DeleteSaveSession"
+	// DeleteSaveSessionFunction deletes a game session from the server.
+	DeleteSaveSessionFunction = "DeleteSaveSession"
 
-const EnumerateSessionsFunction = "EnumerateSessions"
+	// EnumerateSessionsFunction enumerates all available game sessions.
+	EnumerateSessionsFunction = "EnumerateSessions"
 
-const LoadGameFunction = "LoadGame"
+	// LoadGameFunction loads a game session.
+	LoadGameFunction = "LoadGame"
 
-const UploadSaveGameFunction = "UploadSaveGame"
+	// UploadSaveGameFunction uploads a save game file to the server.
+	UploadSaveGameFunction = "UploadSaveGame"
 
-const DownloadSaveGameFunction = "DownloadSaveGame"
+	// DownloadSaveGameFunction downloads a save game file from the server.
+	DownloadSaveGameFunction = "DownloadSaveGame"
+)
