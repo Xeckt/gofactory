@@ -20,7 +20,6 @@ So, if you wish to take the API library and use it for yourself, you can do so.
 - [x] Full integration with the Satisfactory v1 API
 - [x] Goroutine compatible (contexts)
 - [x] Convenient helper functions
-- [ ] Rate limiting (To be discussed)
 - [x] Strongly typed
 
 ## Current state
