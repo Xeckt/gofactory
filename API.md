@@ -74,13 +74,30 @@ done correctly.
 GoFactory's primary goal is to provide developers with maximum access and flexibility, without limitations for
 additional capabilities.
 
+There are also useful generic functions that will help decode a JSON response into a struct of your choosing, provided
+it is aligned with the Satisfactory HTTPS API:
 
-All functions are exported, so if you are not a fond of this behaviour you can take advantage of the helper functions:
+```go
+type CustomJsonStruct struct {
+	Field1 string `json:"field1"`
+	Field2 string `json:"field2"`
+	Field3 string `json:"field3"`
+}
 
-https://github.com/alchemicalkube/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/client.go#L35-L112
+func main() {
+	client := api.NewGoFactoryClient("http://localhost:8080", "1234", false)
 
+	j, err := json.Marshal(CustomJsonStruct{
+		Field1: "value1",
+		Field2: "value2",
+		Field3: "value3",
+	})
 
-See here for an example of how they are used inside the library
-
-https://github.com/alchemicalkube/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/rename.go#L1-L41
-
+	resp, err := api.CreateAndSendPostRequest[CustomJsonStruct](context.Background(), client, api.UploadSaveGameFunction, j)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	
+	fmt.Println(resp)
+}
+```
