@@ -4,7 +4,7 @@
 
 First download the latest version of the module into your project:
 ```bash
-go get github.com/Xeckt/gofactory/api
+go get github.com/alchemicalkube/gofactory/api
 ```
 ---
 
