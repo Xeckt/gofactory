@@ -10,7 +10,7 @@ import (
 )
 
 // Version is the current version of the GoFactory API client.
-const Version = "0.3.1"
+const Version = "1.0.0"
 
 // GoFactoryClient is a client for interacting with the Satisfactory dedicated server API.
 type GoFactoryClient struct {
