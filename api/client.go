@@ -45,7 +45,7 @@ func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryCli
 	}
 }
 
-// CreatePostRequest creates an HTTP POST request to call the specified API function.
+// CreatePostRequest creates a HTTP POST request to call the specified API function.
 func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []byte) (*http.Request, error) {
 	request, err := http.NewRequest(http.MethodPost, c.URL+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
 	if err != nil {
@@ -58,7 +58,7 @@ func (c *GoFactoryClient) CreatePostRequest(functionName string, apiFunction []b
 	return request, nil
 }
 
-// CreatePostRequestWithHeaders creates an HTTP POST request to call the specified API function,
+// CreatePostRequestWithHeaders creates a HTTP POST request to call the specified API function,
 // using a map of custom headers.
 func (c *GoFactoryClient) CreatePostRequestWithHeaders(headers map[string]string, functionName string, apiFunction []byte) (*http.Request, error) {
 	request, err := http.NewRequest(http.MethodPost, c.URL+"/api/v1/?function="+functionName, bytes.NewBuffer(apiFunction))
@@ -102,7 +102,7 @@ func (c *GoFactoryClient) SendPostRequest(ctx context.Context, request *http.Req
 	return json.NewDecoder(resp.Body).Decode(response)
 }
 
-// CreateAndSendPostRequest creates an HTTP POST request for the given API function,
+// CreateAndSendPostRequest creates a HTTP POST request for the given API function,
 // sends it, and decodes the response into the generic type Resp.
 func CreateAndSendPostRequest[Resp any](ctx context.Context, c *GoFactoryClient, functionName string, apiFunction []byte) (*Resp, error) {
 	request, err := c.CreatePostRequest(functionName, apiFunction)
@@ -117,7 +117,7 @@ func CreateAndSendPostRequest[Resp any](ctx context.Context, c *GoFactoryClient,
 	return &resp, nil
 }
 
-// CreateAndSendPostRequestWithHeaders creates an HTTP POST request with custom headers
+// CreateAndSendPostRequestWithHeaders creates a HTTP POST request with custom headers
 // for the given API function, sends it, and decodes the response into the generic type Resp.
 func CreateAndSendPostRequestWithHeaders[Resp any](ctx context.Context, c *GoFactoryClient, headers map[string]string, functionName string, apiFunction []byte) (*Resp, error) {
 	request, err := c.CreatePostRequestWithHeaders(headers, functionName, apiFunction)
