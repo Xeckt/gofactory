@@ -75,10 +75,10 @@ additional capabilities.
 
 All functions are exported, so if you are not a fond of this behaviour you can take advantage of the helper functions:
 
-https://github.com/Xeckt/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/client.go#L35-L112
+https://github.com/alchemicalkube/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/client.go#L35-L112
 
 
 See here for an example of how they are used inside the library
 
-https://github.com/Xeckt/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/rename.go#L1-L41
+https://github.com/alchemicalkube/gofactory/blob/982206d8f8305bc9bea67a0e12347455350a43bc/api/rename.go#L1-L41
 
