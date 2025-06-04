@@ -1,9 +1,9 @@
-# Contributing to [GoFactory](github.com/xeckt/gofactory)
+# Contributing to [GoFactory](https://github.com/Xeckt/gofactory)
 
 Thank you for your interest in contributing! 
 
-[GoFactory](github.com/xeckt/gofactory) has two components to it's source. One is the 
-[API Client Library](github.com/xeckt/gofactory/api) and the other is the [CLI tool](github.com/xeckt/gofactory/cli)
+[GoFactory](https://github.com/Xeckt/gofactory) has two components to it's source. One is the 
+[API Client Library](https://github.com/Xeckt/gofactory/tree/main/api) and the other is the [CLI tool](https://github.com/Xeckt/gofactory/tree/main/cli)
 
 You will need to clone the whole repo even if you plan to only work on one, this is to consolidate everything in one place
 and make it as available as possible for users & developers alike.

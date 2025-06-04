@@ -12,16 +12,42 @@ type APIError struct {
 }
 
 func (e *APIError) Error() string {
-	if e.StatusCode == "invalid_token" {
-		return fmt.Sprintf("gofactory api error: invalid token for the satisfactory api: %s", e.Message)
+	switch e.StatusCode {
+	case "invalid_token":
+		return e.invalidToken()
+	default:
+		return e.defaultMessage()
 	}
+}
+
+func (e *APIError) invalidToken() string {
+	return fmt.Sprintf(
+		"gofactory api error: invalid token for the Satisfactory API: %s",
+		e.Message,
+	)
+}
+
+func (e *APIError) defaultMessage() string {
 	if e.Data != nil {
-		b, err := json.MarshalIndent(e.Data, "", "  ")
+		dataStr, err := e.marshalErrorData()
 		if err != nil {
-			return err.Error()
+			return fmt.Sprintf("gofactory error | cannot marshal errData: %s",
+				err)
 		}
-		return fmt.Sprintf("gofactory api error | status code: %s | message: %s\ndata: %s\n",
-			e.StatusCode, e.Message, string(b))
+		return fmt.Sprintf(
+			"gofactory api error | status code: %s | message: %s\ndata: %s\n",
+			e.StatusCode, e.Message, dataStr,
+		)
 	}
-	return fmt.Sprintf("gofactory api error | status code: %s | message: %s\n", e.StatusCode, e.Message)
+	return fmt.Sprintf("gofactory api error | status code: %s | message: %s\n",
+		e.StatusCode, e.Message)
+}
+
+// marshalErrorData marshals the error data to a JSON string.
+func (e *APIError) marshalErrorData() (string, error) {
+	b, err := json.MarshalIndent(e.Data, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }

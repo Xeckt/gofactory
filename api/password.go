@@ -6,40 +6,77 @@ import (
 	"fmt"
 )
 
-const NOT_AUTHENTICATED_PRIVILEGE string = "NotAuthenticated"
-const CLIENT_PRIVILEGE string = "ClientPrivilege"
-const ADMINISTRATOR_PRIVILEGE string = "Administrator"
-const INITIAL_ADMIN_PRIVILEGE string = "InitialAdmin"
-const API_TOKEN_PRIVILEGE string = "ApiToken"
+// Privilege level constants used for authentication.
+const (
+	// NOT_AUTHENTICATED_PRIVILEGE represents a user who is not authenticated.
+	NOT_AUTHENTICATED_PRIVILEGE string = "NotAuthenticated"
 
+	// CLIENT_PRIVILEGE represents a standard client privilege level.
+	CLIENT_PRIVILEGE string = "ClientPrivilege"
+
+	// ADMINISTRATOR_PRIVILEGE represents administrator-level privileges.
+	ADMINISTRATOR_PRIVILEGE string = "Administrator"
+
+	// INITIAL_ADMIN_PRIVILEGE represents the initial admin privilege level during claim.
+	INITIAL_ADMIN_PRIVILEGE string = "InitialAdmin"
+
+	// API_TOKEN_PRIVILEGE represents an API token-based privilege level.
+	API_TOKEN_PRIVILEGE string = "ApiToken"
+)
+
+// PasswordlessLoginRequest represents a request to authenticate using
+// passwordless login with a minimum required privilege level.
 type PasswordlessLoginRequest struct {
-	Function string                       `json:"function"`
-	Data     PasswordlessLoginRequestData `json:"data"`
+	// Function specifies the API function to call for passwordless login.
+	Function string `json:"function"`
+
+	// Data contains the required privilege level for login.
+	Data PasswordlessLoginRequestData `json:"data"`
 }
 
+// PasswordLoginRequest represents a request to authenticate using
+// a password and a required privilege level.
 type PasswordLoginRequest struct {
-	Function string                   `json:"function"`
-	Data     PasswordLoginRequestData `json:"data"`
+	// Function specifies the API function to call for password-based login.
+	Function string `json:"function"`
+
+	// Data contains the required privilege level and password.
+	Data PasswordLoginRequestData `json:"data"`
 }
 
+// PasswordLoginRequestData contains the minimum privilege level
+// and password for password-based authentication.
 type PasswordLoginRequestData struct {
+	// MinimumPrivilegeLevel specifies the minimum required privilege for authentication.
 	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel"`
-	Password              string `json:"password"`
+
+	// Password is the password used for authentication.
+	Password string `json:"password"`
 }
 
+// PasswordlessLoginRequestData contains the minimum privilege level
+// required for passwordless login.
 type PasswordlessLoginRequestData struct {
+	// MinimumPrivilegeLevel specifies the minimum required privilege for authentication.
 	MinimumPrivilegeLevel string `json:"minimumPrivilegeLevel"`
 }
 
+// LoginResponse represents the API response for authentication requests.
 type LoginResponse struct {
+	// Data contains the authentication token returned by the server.
 	Data PasswordLoginResponseData `json:"data,omitempty"`
 }
 
+// PasswordLoginResponseData holds the authentication token
+// returned after a successful authentication request.
 type PasswordLoginResponseData struct {
+	// AuthToken is the token used for subsequent API requests.
 	AuthToken string `json:"authenticationToken,omitempty"`
 }
 
-func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege string) (*PasswordLoginResponseData, error) {
+// PasswordlessLogin authenticates the client using passwordless login on an unclaimed server or
+// when client protection password is not set. Updates the *GoFactoryClient.Token field with the new token.
+func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege string) error {
 	functionBody, err := json.Marshal(PasswordlessLoginRequest{
 		Function: PasswordlessLoginFunction,
 		Data: PasswordlessLoginRequestData{
@@ -47,7 +84,7 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 		},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	headers := map[string]string{
@@ -57,14 +94,17 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordlessLoginFunction, functionBody)
 	if err != nil {
 		fmt.Println("Error is here", tokenResponse, err)
-		return nil, err
+		return err
 	}
 
-	c.CurrentPrivilege = privilege
-	return &tokenResponse.Data, nil
+	c.currentPrivilege = privilege
+	c.Token = tokenResponse.Data.AuthToken
+	return nil
 }
 
-func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, password string) (*PasswordLoginResponseData, error) {
+// PasswordLogin authenticates the client using a password for the specified privilege level.
+// Updates the *GoFactoryClient.Token field with the new token.
+func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, password string) error {
 	functionBody, err := json.Marshal(PasswordLoginRequest{
 		Function: PasswordLoginFunction,
 		Data: PasswordLoginRequestData{
@@ -74,7 +114,7 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 	})
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	headers := map[string]string{
@@ -83,21 +123,30 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 
 	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordLoginFunction, functionBody)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	c.CurrentPrivilege = privilege
-	return &tokenResponse.Data, nil
+
+	c.currentPrivilege = privilege
+	c.Token = tokenResponse.Data.AuthToken
+	return nil
 }
 
+// ClientPasswordRequest represents a request to set the client password.
 type ClientPasswordRequest struct {
-	Function string                    `json:"function,omitempty"`
-	Data     ClientPasswordRequestData `json:"data,omitempty"`
+	// Function specifies the API function to call for setting the client password.
+	Function string `json:"function,omitempty"`
+
+	// Data contains the new client password.
+	Data ClientPasswordRequestData `json:"data,omitempty"`
 }
 
+// ClientPasswordRequestData holds the new client password.
 type ClientPasswordRequestData struct {
+	// Password is the new client password.
 	Password string `json:"password,omitempty"`
 }
 
+// SetClientPassword sets a new client password for the Satisfactory dedicated server.
 func (c *GoFactoryClient) SetClientPassword(ctx context.Context, newPassword string) error {
 	functionBody, err := json.Marshal(ClientPasswordRequest{
 		Function: SetClientPasswordFunction,
@@ -124,23 +173,36 @@ func (c *GoFactoryClient) SetClientPassword(ctx context.Context, newPassword str
 	return nil
 }
 
+// AdminPasswordRequest represents a request to set the administrator password.
 type AdminPasswordRequest struct {
-	Function string                   `json:"function,omitempty"`
-	Data     AdminPasswordRequestData `json:"data,omitempty"`
+	// Function specifies the API function to call for setting the admin password.
+	Function string `json:"function,omitempty"`
+
+	// Data contains the new administrator password.
+	Data AdminPasswordRequestData `json:"data,omitempty"`
 }
 
+// AdminPasswordRequestData holds the new administrator password.
 type AdminPasswordRequestData struct {
+	// Password is the new administrator password.
 	Password string `json:"password,omitempty"`
 }
 
+// AdminPasswordResponseData wraps the admin password response from the server.
 type AdminPasswordResponseData struct {
+	// Data contains the authentication token after setting the admin password.
 	Data AdminPasswordResponse `json:"data,omitempty"`
 }
 
+// AdminPasswordResponse represents the response containing the new authentication token.
 type AdminPasswordResponse struct {
+	// AuthToken is the new authentication token after setting the admin password.
 	AuthToken string `json:"authenticationToken,omitempty"`
 }
 
+// SetAdminPassword sets a new administrator password on the Satisfactory server
+// and updates the *GoFactoryClient.Token with the new token.
+// This POST requests invalidates all previous Client and Admin tokens.
 func (c *GoFactoryClient) SetAdminPassword(ctx context.Context, newPassword string) error {
 	functionBody, err := json.Marshal(AdminPasswordRequest{
 		Function: SetAdminPasswordFunction,
