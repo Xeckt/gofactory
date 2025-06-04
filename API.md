@@ -10,6 +10,8 @@ go get github.com/alchemicalkube/gofactory/api
 
 ## Usage
 
+[The GoFactory library uses the Satisfactory OpenAPI specifications](https://github.com/satisfactory-oas/spec)
+
 There are various ways to use the library, and you can utilise a bunch of functionality since there is full integration
 with the Satisfactory v1 API. Let's say we want to claim an unclaimed Satisfactory dedicated server, we must first
 obtain an `InitialAdmin` privileged token:
