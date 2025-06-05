@@ -52,6 +52,18 @@ func CheckMessageType(r *bytes.Reader, t uint8) error {
 	return nil
 }
 
+func CheckVersion(r *bytes.Reader) error {
+	var version uint8
+	err := binary.Read(r, binary.LittleEndian, &version)
+	if err != nil {
+		return err
+	}
+	if version != ProtocolVersion {
+		return fmt.Errorf("invalid protocol version, expected %v, got %v", ProtocolVersion, version)
+	}
+	return nil
+}
+
 func BuildPollServerStateEnvelope(cookie uint64) ([]byte, error) {
 	var buf bytes.Buffer
 
@@ -111,6 +123,7 @@ func SendUDPQuery(server string, request []byte, maxRetries int, retryDelay time
 }
 
 type ServerState int
+type ServerSubStateId int
 
 const (
 	ServerStateOffline ServerState = iota
@@ -155,7 +168,6 @@ func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstat
 		return nil, nil, fmt.Errorf("response too short")
 	}
 
-	fmt.Println(data)
 	r := bytes.NewReader(data)
 
 	err := CheckMagicPacket(r)
@@ -168,8 +180,7 @@ func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstat
 		return nil, nil, err
 	}
 
-	var version uint8
-	err = binary.Read(r, binary.LittleEndian, &version)
+	err = CheckVersion(r)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -181,6 +192,11 @@ func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstat
 		return nil, nil, err
 	}
 
+	if &resp == nil {
+		return nil, nil, fmt.Errorf("server returned an empty server state response")
+	}
+
+	fmt.Println(resp.NumSubStates)
 	subStates := ServerSubstateResponse{
 		SubStates: make([]ServerSubState, resp.NumSubStates),
 	}
@@ -203,9 +219,24 @@ func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstat
 		}
 	}
 
-	if &resp == nil {
-		return nil, nil, fmt.Errorf("server returned an empty server state response")
+	err = binary.Read(r, binary.LittleEndian, &subStates.ServerNameLength)
+	if err != nil {
+		fmt.Println("yeah, here")
+		return nil, nil, err
 	}
 
+	subStates.ServerName = make([]byte, subStates.ServerNameLength)
+
+	for {
+		_, err := r.Read(subStates.ServerName)
+		if err != nil {
+			if err.Error() == "EOF" {
+				break
+			}
+			return nil, nil, err
+		}
+	}
+
+	fmt.Println("testing", []byte("Hi discord!"))
 	return &resp, &subStates, nil
 }
