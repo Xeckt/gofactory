@@ -9,11 +9,11 @@ import (
 )
 
 const (
-	ProtocolMagic      uint16 = 0xF6D5
-	ProtocolVersion    uint8  = 1
-	TerminatorByte     uint8  = 0x1
-	MessagePollState   uint8  = 0x0
-	MessageServerState uint8  = 0x1
+	ProtocolMagic        uint16 = 0xF6D5
+	ProtocolVersion      uint8  = 1
+	TerminatorByte       uint8  = 0x1
+	MessagePollState     uint8  = 0x0
+	MessageStateResponse uint8  = 0x1
 )
 
 type Envelope struct {
@@ -28,12 +28,28 @@ type PollServerState struct {
 	Cookie uint64
 }
 
-type ServerStateResponse struct {
-	Cookie       uint64
-	ServerState  uint8
-	ServerNetCL  uint32
-	ServerFlags  uint64
-	NumSubStates uint8
+func CheckMagicPacket(r *bytes.Reader) error {
+	var magic uint16
+	err := binary.Read(r, binary.LittleEndian, &magic)
+	if err != nil {
+		return nil
+	}
+	if magic != ProtocolMagic {
+		return fmt.Errorf("invalid magic packet, expected %v, got %v", ProtocolMagic, magic)
+	}
+	return nil
+}
+
+func CheckMessageType(r *bytes.Reader, t uint8) error {
+	var messageType uint8
+	err := binary.Read(r, binary.LittleEndian, &messageType)
+	if err != nil {
+		return nil
+	}
+	if messageType != t {
+		return fmt.Errorf("invalid message type, expected %v, got %v", t, messageType)
+	}
+	return nil
 }
 
 func BuildPollServerStateEnvelope(cookie uint64) ([]byte, error) {
@@ -85,74 +101,111 @@ func SendUDPQuery(server string, request []byte, maxRetries int, retryDelay time
 
 		respLen, _, err = conn.ReadFromUDP(buffer)
 		if err == nil {
-			// Got response
 			return buffer[:respLen], nil
 		}
 
-		// Log and wait before retrying
-		fmt.Println("Retry", i+1, "due to error:", err)
 		time.Sleep(retryDelay)
 	}
 
 	return nil, fmt.Errorf("no response after %d retries", maxRetries)
 }
 
-func ParseServerStateResponse(data []byte) (*ServerStateResponse, error) {
+type ServerState int
+
+const (
+	ServerStateOffline ServerState = iota
+	ServerStateIdle
+	ServerStateLoading
+	ServerStatePlaying
+)
+
+var ServerStateMap = map[ServerState]string{
+	ServerStateOffline: "Offline",
+	ServerStateIdle:    "Idle",
+	ServerStateLoading: "Loading",
+	ServerStatePlaying: "Playing",
+}
+
+type ServerStateResponse struct {
+	Cookie       uint64
+	ServerState  uint8
+	ServerNetCL  uint32
+	ServerFlags  uint64
+	NumSubStates uint8
+}
+
+type ServerSubstateResponse struct {
+	SubStates        []ServerSubState
+	ServerNameLength uint16
+	ServerName       []byte
+}
+
+type ServerSubState struct {
+	SubStateId      uint8
+	SubStateVersion uint16
+}
+
+func (state ServerState) String() string {
+	return ServerStateMap[state]
+
+}
+
+func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstateResponse, error) {
 	if len(data) < 22 { // min size of fixed fields
-		return nil, fmt.Errorf("response too short")
+		return nil, nil, fmt.Errorf("response too short")
 	}
 
+	fmt.Println(data)
 	r := bytes.NewReader(data)
 
-	var magic uint16
-	err := binary.Read(r, binary.LittleEndian, &magic)
+	err := CheckMagicPacket(r)
 	if err != nil {
-		return nil, err
-	}
-	if magic != ProtocolMagic {
-		return nil, fmt.Errorf("invalid magic: got %x", magic)
+		return nil, nil, err
 	}
 
-	var msgType uint8
-	err = binary.Read(r, binary.LittleEndian, &msgType)
+	err = CheckMessageType(r, MessageStateResponse)
 	if err != nil {
-		return nil, err
-	}
-	if msgType != MessageServerState {
-		return nil, fmt.Errorf("unexpected message type: %d", msgType)
+		return nil, nil, err
 	}
 
 	var version uint8
 	err = binary.Read(r, binary.LittleEndian, &version)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	var resp ServerStateResponse
-	err = binary.Read(r, binary.LittleEndian, &resp.Cookie)
+	err = binary.Read(r, binary.LittleEndian, &resp)
 	if err != nil {
-		return nil, err
+		fmt.Println("here")
+		return nil, nil, err
 	}
 
-	err = binary.Read(r, binary.LittleEndian, &resp.ServerState)
-	if err != nil {
-		return nil, err
+	subStates := ServerSubstateResponse{
+		SubStates: make([]ServerSubState, resp.NumSubStates),
 	}
 
-	err = binary.Read(r, binary.LittleEndian, &resp.ServerNetCL)
-	if err != nil {
-		return nil, err
+	for i := 0; i < int(resp.NumSubStates); i++ {
+		var subStateId uint8
+		var subStateVersion uint16
+
+		err = binary.Read(r, binary.LittleEndian, &subStateId)
+		if err != nil {
+			return nil, nil, err
+		}
+		err = binary.Read(r, binary.LittleEndian, &subStateVersion)
+		if err != nil {
+			return nil, nil, err
+		}
+		subStates.SubStates[i] = ServerSubState{
+			SubStateId:      subStateId,
+			SubStateVersion: subStateVersion,
+		}
 	}
 
-	err = binary.Read(r, binary.LittleEndian, &resp.ServerFlags)
-	if err != nil {
-		return nil, err
+	if &resp == nil {
+		return nil, nil, fmt.Errorf("server returned an empty server state response")
 	}
 
-	err = binary.Read(r, binary.LittleEndian, &resp.NumSubStates)
-	if err != nil {
-		return nil, err
-	}
-
-	return &resp, nil
+	return &resp, &subStates, nil
 }
