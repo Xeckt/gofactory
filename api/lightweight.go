@@ -64,7 +64,7 @@ func CheckVersion(r *bytes.Reader) error {
 	return nil
 }
 
-func BuildPollServerStateEnvelope(cookie uint64) ([]byte, error) {
+func BuildEnvelope(cookie uint64) ([]byte, error) {
 	var buf bytes.Buffer
 
 	err := binary.Write(&buf, binary.LittleEndian, ProtocolMagic)
@@ -140,14 +140,11 @@ var ServerStateMap = map[ServerState]string{
 }
 
 type ServerStateResponse struct {
-	Cookie       uint64
-	ServerState  uint8
-	ServerNetCL  uint32
-	ServerFlags  uint64
-	NumSubStates uint8
-}
-
-type ServerSubstateResponse struct {
+	Cookie           uint64
+	ServerState      uint8
+	ServerNetCL      uint32
+	ServerFlags      uint64
+	NumSubStates     uint8
 	SubStates        []ServerSubState
 	ServerNameLength uint16
 	ServerName       []byte
@@ -163,43 +160,63 @@ func (state ServerState) String() string {
 
 }
 
-func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstateResponse, error) {
+func ParseServerStateResponse(data []byte) (*ServerStateResponse, error) {
 	if len(data) < 22 { // min size of fixed fields
-		return nil, nil, fmt.Errorf("response too short")
+		return nil, fmt.Errorf("response too short")
 	}
 
 	r := bytes.NewReader(data)
 
 	err := CheckMagicPacket(r)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	err = CheckMessageType(r, MessageStateResponse)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	err = CheckVersion(r)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var resp ServerStateResponse
-	err = binary.Read(r, binary.LittleEndian, &resp)
+
+	/*
+		I really don't like the line by line reading of the offset to each struct member.
+		Will need to figure out a way to seek to offset 21 where substate number is and then
+		populate the struct. Binary requires fixed sizes if you want to do it all at once,
+		hence the annoying line by line.
+	*/
+
+	err = binary.Read(r, binary.LittleEndian, &resp.Cookie)
 	if err != nil {
-		fmt.Println("here")
-		return nil, nil, err
+		return nil, err
 	}
 
-	if &resp == nil {
-		return nil, nil, fmt.Errorf("server returned an empty server state response")
+	err = binary.Read(r, binary.LittleEndian, &resp.ServerState)
+	if err != nil {
+		return nil, err
 	}
 
-	fmt.Println(resp.NumSubStates)
-	subStates := ServerSubstateResponse{
-		SubStates: make([]ServerSubState, resp.NumSubStates),
+	err = binary.Read(r, binary.LittleEndian, &resp.ServerNetCL)
+	if err != nil {
+		return nil, err
 	}
+
+	err = binary.Read(r, binary.LittleEndian, &resp.ServerFlags)
+	if err != nil {
+		return nil, err
+	}
+
+	err = binary.Read(r, binary.LittleEndian, &resp.NumSubStates)
+	if err != nil {
+		return nil, err
+	}
+
+	subStates := make([]ServerSubState, resp.NumSubStates)
 
 	for i := 0; i < int(resp.NumSubStates); i++ {
 		var subStateId uint8
@@ -207,36 +224,38 @@ func ParseServerStateResponse(data []byte) (*ServerStateResponse, *ServerSubstat
 
 		err = binary.Read(r, binary.LittleEndian, &subStateId)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
+
 		err = binary.Read(r, binary.LittleEndian, &subStateVersion)
 		if err != nil {
-			return nil, nil, err
+			return nil, err
 		}
-		subStates.SubStates[i] = ServerSubState{
+
+		subStates[i] = ServerSubState{
 			SubStateId:      subStateId,
 			SubStateVersion: subStateVersion,
 		}
 	}
 
-	err = binary.Read(r, binary.LittleEndian, &subStates.ServerNameLength)
+	resp.SubStates = subStates
+
+	err = binary.Read(r, binary.LittleEndian, &resp.ServerNameLength)
 	if err != nil {
-		fmt.Println("yeah, here")
-		return nil, nil, err
+		return nil, err
 	}
 
-	subStates.ServerName = make([]byte, subStates.ServerNameLength)
+	resp.ServerName = make([]byte, resp.ServerNameLength+1)
 
 	for {
-		_, err := r.Read(subStates.ServerName)
+		_, err := r.Read(resp.ServerName)
 		if err != nil {
 			if err.Error() == "EOF" {
 				break
 			}
-			return nil, nil, err
+			return nil, err
 		}
 	}
 
-	fmt.Println("testing", []byte("Hi discord!"))
-	return &resp, &subStates, nil
+	return &resp, nil
 }
