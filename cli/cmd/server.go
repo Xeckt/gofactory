@@ -3,9 +3,8 @@ package cmd
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
-	"github.com/rs/zerolog/log"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -20,45 +19,38 @@ var queryServerCommand = &cobra.Command{
 	Short: "Receive information about the current server state.",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Trace().Msgf("query server stated command called with ctx %v and client %+v", ctx, client)
 		state, err := client.QueryServerState(ctx)
+		Logger.Trace("query server command",
+			Logger.Args(
+				"context", ctx,
+				"client pointer", &client,
+				"client object", client,
+				"state pointer", &state,
+				"state object", state),
+		)
 		if err != nil {
-			log.Fatal().Err(err).Msg("error during query server state command")
+			Logger.Error("query server error", Logger.Args("error", err))
 		}
 		if state == nil {
-			log.Fatal().Msgf("query server state command returned nil response: %+v", client)
+			Logger.Error("query server state returned nil response")
 		}
 
-		message := fmt.Sprintf("-------"+
-			"\nActive Session: %s\n"+
-			"Connected Players: %d\n"+
-			"Player Limit: %d\n"+
-			"Tech Tier: %d\n"+
-			"Active Schematic: %s\n"+
-			"Phase: %s\n"+
-			"Server running: %t\n"+
-			"Running time: %02d:%02d:%02d\n"+
-			"Paused: %t\n"+
-			"Average Tick Rate: %f\n"+
-			"Auto Load Session Name: %s\n"+
-			"-------",
-			state.ActiveSessionName,
-			state.NumConnectedPlayers,
-			state.PlayerLimit,
-			state.TechTier,
-			state.ActiveSchematic,
-			state.GamePhase,
-			state.IsGameRunning,
+		runningTime := fmt.Sprintf("%02d:%02d:%02d",
 			state.TotalGameDuration/3600,
 			(state.TotalGameDuration%3600)/60,
-			state.TotalGameDuration%60,
-			state.IsGamePaused,
-			state.AverageTickRate,
-			state.AutoLoadSessionName)
+			state.TotalGameDuration%60)
 
-		for _, line := range strings.Split(message, "\n") {
-			log.Info().Msgf("%s", line)
-		}
+		Logger.Info("server state", Logger.Args(
+			"active session", state.ActiveSessionName,
+			"connected players", state.NumConnectedPlayers,
+			"player limit", state.PlayerLimit,
+			"tech tier", state.TechTier,
+			"phase", state.GamePhase,
+			"server running", state.IsGameRunning,
+			"running time", runningTime,
+			"paused", state.IsGamePaused,
+			"average tick rate", state.AverageTickRate,
+			"auto load session name", state.AutoLoadSessionName))
 	},
 }
 
@@ -72,61 +64,53 @@ var getServerOptionsCommand = &cobra.Command{
 	Use:   "get",
 	Short: "get server options",
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Trace().Msgf("get server options called with ctx %v", ctx)
+		Logger.Trace("get server options", Logger.Args(
+			"context", ctx,
+			"client pointer", &client,
+			"client object", client,
+		))
+
 		options, err := client.GetServerOptions(ctx)
 		if err != nil {
-			log.Fatal().Err(err)
+			Logger.Error("get server options error", Logger.Args("error", err))
 		}
-		if options == nil {
-			log.Fatal().Msgf("get server options returned empty: %+v", client)
-		}
-		log.Trace().Msgf("received options: %+v", &options)
 
-		appliedMessage := fmt.Sprintf("\n-------APPLIED OPTIONS------\n"+
-			"Automatic Pause: %s\n"+
-			"Auto Save on Disconnect: %s\n"+
-			"Disable Seasonal Events: %s\n"+
-			"Autosave Interval: %s\n"+
-			"Server Restart Time Slot: %s\n"+
-			"Send Gameplay Data: %s\n"+
-			"Network Quality: %s\n"+
-			"-------APPLIED OPTIONS------\n",
-			options.ServerOptions.AutoPause, options.ServerOptions.AutoSaveOnDisconnect,
-			options.ServerOptions.DisableSeasonalEvents, options.ServerOptions.AutosaveInterval,
-			options.ServerOptions.ServerRestartTimeSlot, options.ServerOptions.SendGameplayData,
-			options.ServerOptions.NetworkQuality)
+		if options == nil {
+			Logger.Error("get server options returned nil response")
+		}
+
+		Logger.Trace("server options response", Logger.Args(
+			"options pointer", &options,
+			"options object", options,
+		))
+
+		Logger.Info("applied server options", Logger.Args(
+			"automatic pause", options.ServerOptions.AutoPause,
+			"auto save on disconnect", options.ServerOptions.AutoSaveOnDisconnect,
+			"disable seasonal events", options.ServerOptions.DisableSeasonalEvents,
+			"autosave interval", options.ServerOptions.AutosaveInterval,
+			"server restart time", options.ServerOptions.ServerRestartTimeSlot,
+			"send gameplay data", options.ServerOptions.SendGameplayData,
+			"network quality", options.ServerOptions.NetworkQuality))
 
 		if !reflect.ValueOf(options.PendingServerOptions).IsZero() {
-			// Going to require some reflection magic to do this dynamically for pretty printing
-			// Will only print values that aren't zero so we dont spam the console with nil info.
+			// I f*cking love pterm.
+
+			m := make(map[string]any)
+			pendingOptionsStyle := make(map[string]pterm.Style)
+
 			s := reflect.ValueOf(options.PendingServerOptions)
 			for i := 0; i < s.NumField(); i++ {
 				if !s.Field(i).IsZero() {
-					appliedMessage += fmt.Sprintf(
-						"\n-------PENDING OPTIONS------\n"+
-							"%s %s"+
-							"\n-------PENDING OPTIONS------\n",
-						s.Type().Field(i).Name, s.Field(i).String())
+					pendingOptionsStyle[s.Type().Field(i).Name] = *pterm.NewStyle(pterm.FgYellow)
+					m[s.Type().Field(i).Name] = s.Field(i).String()
 				}
 			}
 
-			/*appliedMessage += fmt.Sprintf("\n-------PENDING OPTIONS------\n"+
-			"Automatic Pause: %s\n"+
-			"Auto Save on Disconnect: %s\n"+
-			"Disable Seasonal Events: %s\n"+
-			"Autosave Interval: %s\n"+
-			"Server Restart Time Slot: %s\n"+
-			"Send Gameplay Data: %s\n"+
-			"Network Quality: %s\n"+
-			"-------PENDING OPTIONS------\n",
-			options.PendingServerOptions.AutoPause, options.PendingServerOptions.AutoSaveOnDisconnect,
-			options.PendingServerOptions.DisableSeasonalEvents, options.PendingServerOptions.AutosaveInterval,
-			options.PendingServerOptions.ServerRestartTimeSlot, options.PendingServerOptions.SendGameplayData,
-			options.PendingServerOptions.NetworkQuality)*/
-		}
-
-		for _, line := range strings.Split(appliedMessage, "\n") {
-			log.Info().Msgf("%s", line)
+			if m != nil {
+				Logger.AppendKeyStyles(pendingOptionsStyle)
+				Logger.Info("pending server options", Logger.ArgsFromMap(m))
+			}
 		}
 	},
 }
@@ -136,7 +120,6 @@ var setServerOptionsCommand = &cobra.Command{
 	Short: "set server options",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Trace().Msgf("set server options called with ctx %v", ctx)
 		/*
 			Since there are a lot of options here, I'll need to think about how to actually apply them.
 			By standard, we will allow multiple flags to specify the server options as sometimes you may only want

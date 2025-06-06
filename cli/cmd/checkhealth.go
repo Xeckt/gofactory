@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -10,18 +9,23 @@ var healthCheckCmd = &cobra.Command{
 	Short: "Run basic health check against the HTTPS api",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Trace().Msgf("health check command called with ctx %v and client %+v", ctx, &client)
-		health, err := client.GetServerHealth(ctx, "gofactory-cli-healthcheck-call")
+		Logger.Trace("health check command",
+			Logger.Args(
+				"Context", ctx,
+				"Client pointer", &client),
+		)
+		server, err := client.GetServerHealth(ctx, "gofactory-cli-healthcheck-call")
 		if err != nil {
-			log.Fatal().Err(err).Msg("error during health check command")
+			Logger.Fatal("healthcheck error", Logger.Args("error", err, "context", ctx, "object", server))
 		}
-		if health == nil {
-			log.Fatal().Msgf("health check command returned nil health response: %+v", ctx)
+		if server == nil {
+			Logger.Fatal("healthcheck command returned nil response")
 		}
-		if len(health.CustomData) > 0 {
-			log.Info().Msgf("Server health: %+v\nCustom data reported: %s", health.Health, health.CustomData)
+		if len(server.CustomData) > 0 {
+			Logger.Info("health check returned custom data", Logger.Args("Health", server,
+				"Custom Data", server.CustomData))
 		}
-		log.Info().Msgf("Server health: %+v", health.Health)
+		Logger.Info("health check returned successfully", Logger.Args("Health", server.Health))
 	},
 }
 

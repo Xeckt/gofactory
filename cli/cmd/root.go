@@ -5,8 +5,7 @@ import (
 	"os"
 
 	"github.com/alchemicalkube/gofactory/api"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -24,6 +23,7 @@ var (
 	serverToken string
 	client      *api.GoFactoryClient
 	ctx         context.Context
+	Logger      *pterm.Logger
 )
 
 const VERSION = "0.0.1"
@@ -44,17 +44,12 @@ func init() {
 
 	Root.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "set the cli to trace mode")
 
-	consoleWriter := zerolog.ConsoleWriter{Out: os.Stdout}
-	consoleWriter.TimeFormat = "15:04:05"
-
-	multi := zerolog.MultiLevelWriter(consoleWriter)
-
-	log.Logger = zerolog.New(multi).With().Timestamp().Logger().Level(zerolog.InfoLevel)
+	Logger = pterm.DefaultLogger.WithLevel(pterm.LogLevelInfo)
 
 	Root.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		if Trace {
-			log.Logger = log.Logger.Level(zerolog.TraceLevel)
-			log.Trace().Msg("tracing enabled")
+			Logger.Level = pterm.LogLevelTrace
+			Logger = Logger.WithCaller()
 		}
 	}
 }

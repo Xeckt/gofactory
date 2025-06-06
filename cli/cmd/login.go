@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/alchemicalkube/gofactory/api"
-	"github.com/rs/zerolog/log"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +29,12 @@ var passwordlessSubCmd = &cobra.Command{
 	Short: "authenticate with the dedicated server without password",
 	Long:  "returns the new token retrieved from the passwordless privilege to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
+		Logger.Trace("passwordless", Logger.Args(
+			"client object", client,
+			"client pointer", &client,
+			"client privilege", privilegeFlag,
+		))
+
 		switch strings.ToLower(privilegeFlag) {
 		case "notauthenticated":
 			privilegeFlag = api.NOT_AUTHENTICATED_PRIVILEGE
@@ -40,21 +47,30 @@ var passwordlessSubCmd = &cobra.Command{
 		case "apitoken":
 			privilegeFlag = api.API_TOKEN_PRIVILEGE
 		default:
-			log.Fatal().Msgf("Unknown privilege %s, please use one of %v", privilegeFlag, validPrivilegeFlags)
+			Logger.Error("Unknown privilege type", Logger.Args(
+				"specified:", privilegeFlag,
+				"expected:", validPrivilegeFlags,
+			))
 		}
 
 		err := client.PasswordlessLogin(ctx, privilegeFlag)
 		if err != nil {
-			log.Fatal().Err(err)
+			Logger.Fatal("error with passwordless login", Logger.Args("error", err))
 		}
 
 		if len(client.Token) == 0 {
-			log.Fatal().Msg("token returned is empty. Are you sure it is not claimed or no client protection password is enabled?")
+			Logger.Fatal("token returned is empty. Are you sure it is not claimed or no client protection password is enabled?")
 		}
 
-		log.Info().Msgf("Successfully authenticated with privilege: %s", privilegeFlag)
-		log.Info().Msgf("Token returned: %s", client.Token)
-		log.Warn().Msgf("If you wish to use this token, make sure to replace your %s environment variable!", ENV_TOKEN)
+		Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
+
+		Logger.Info("server response success", Logger.Args(
+			"privilege", privilegeFlag,
+			"new token", client.Token,
+			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
+				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_TOKEN)),
+		))
+
 	},
 }
 
@@ -65,18 +81,33 @@ var passwordSubCmd = &cobra.Command{
 	Short: "authenticate with the dedicated server with a password",
 	Run: func(cmd *cobra.Command, args []string) {
 		if passwordFlag == "" {
-			log.Fatal().Msgf("You must provide a password")
+			Logger.Fatal("You must provide a password")
 		}
+
+		Logger.Trace("password", Logger.Args(
+			"client object", client,
+			"client pointer", &client,
+			"client privilege", privilegeFlag,
+			"password", passwordFlag,
+		))
+
 		err := client.PasswordLogin(ctx, privilegeFlag, passwordFlag)
 		if err != nil {
-			log.Fatal().Err(err)
+			Logger.Fatal("password command error", Logger.Args("error", err))
 		}
+
 		if client.Token == "" {
-			log.Fatal().Msgf("token returned is empty. are you sure the information you provided was correct?")
+			Logger.Fatal("token returned is empty. are you sure the information you provided was correct?")
 		}
-		log.Info().Msgf("Successfully authenticated with privilege: %s", privilegeFlag)
-		log.Info().Msgf("Token returned: %s", client.Token)
-		log.Warn().Msgf("If you wish to use this token, make sure to replace your %s environment variable!", ENV_TOKEN)
+
+		Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
+
+		Logger.Info("server response success", Logger.Args(
+			"privilege", privilegeFlag,
+			"new token", client.Token,
+			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
+				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_TOKEN)),
+		))
 	},
 }
 
