@@ -102,7 +102,7 @@ var getServerOptionsCommand = &cobra.Command{
 			s := reflect.ValueOf(options.PendingServerOptions)
 			for i := 0; i < s.NumField(); i++ {
 				if !s.Field(i).IsZero() {
-					log.Info().Msgf(
+					appliedMessage += fmt.Sprintf(
 						"\n-------PENDING OPTIONS------\n"+
 							"%s %s"+
 							"\n-------PENDING OPTIONS------\n",
