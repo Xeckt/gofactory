@@ -12,7 +12,7 @@ const (
 	NOT_AUTHENTICATED_PRIVILEGE string = "NotAuthenticated"
 
 	// CLIENT_PRIVILEGE represents a standard client privilege level.
-	CLIENT_PRIVILEGE string = "ClientPrivilege"
+	CLIENT_PRIVILEGE string = "Client"
 
 	// ADMINISTRATOR_PRIVILEGE represents administrator-level privileges.
 	ADMINISTRATOR_PRIVILEGE string = "Administrator"
@@ -99,6 +99,7 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 
 	c.currentPrivilege = privilege
 	c.Token = tokenResponse.Data.AuthToken
+
 	return nil
 }
 
