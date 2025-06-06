@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 // HealthCheckResponse represents the response returned by the server's health check,
@@ -43,12 +44,17 @@ type HealthCheckRequest struct {
 // including any custom client data. It returns the server's health status
 // and custom server data wrapped in a HealthCheckResponse.
 func (c *GoFactoryClient) GetServerHealth(ctx context.Context, customData string) (*HealthCheckResponse, error) {
+	if len(customData) == 0 {
+		return nil, fmt.Errorf("must specify custom data for healthcheck")
+	}
+
 	functionBody, err := json.Marshal(HealthCheckRequest{
 		Function: HealthCheckFunction,
 		Data: HealthCheckCustomData{
 			CustomData: customData,
 		},
 	})
+
 	if err != nil {
 		return nil, err
 	}
@@ -57,5 +63,6 @@ func (c *GoFactoryClient) GetServerHealth(ctx context.Context, customData string
 	if err != nil {
 		return nil, err
 	}
+
 	return &healthCheckResponse.Data, nil
 }
