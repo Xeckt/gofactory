@@ -10,22 +10,19 @@ import (
 type Context struct {
 	Client     *api.GoFactoryClient `kong:"-"`
 	ApiContext context.Context
+	Trace      bool
 }
 
 type CheckHealthCommand struct{}
 
 func (h *CheckHealthCommand) Run(ctx *Context) error {
 	log.Trace().Msgf("health check command called with ctx %v and client %+v", ctx, ctx.Client)
-	health, err := ctx.Client.GetServerHealth(ctx.ApiContext, "")
+	health, err := ctx.Client.GetServerHealth(ctx.ApiContext, "gofactory-cli-healthcheck-call")
 	if err != nil {
 		log.Fatal().Err(err).Msg("error during health check command")
 	}
 	if health == nil {
 		log.Fatal().Msgf("health check command returned nil health response: %+v", ctx.Client)
-	}
-	if health.CustomData == "" || health.Health == "" {
-		log.Error().Msgf("Health check looks empty, do you have a running session?")
-		return nil
 	}
 	log.Info().Msgf("Health check returned: %+v", health.Health)
 	return nil
