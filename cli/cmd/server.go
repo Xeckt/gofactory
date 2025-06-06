@@ -97,19 +97,32 @@ var getServerOptionsCommand = &cobra.Command{
 			options.ServerOptions.NetworkQuality)
 
 		if !reflect.ValueOf(options.PendingServerOptions).IsZero() {
-			appliedMessage += fmt.Sprintf("\n-------PENDING OPTIONS------\n"+
-				"Automatic Pause: %s\n"+
-				"Auto Save on Disconnect: %s\n"+
-				"Disable Seasonal Events: %s\n"+
-				"Autosave Interval: %s\n"+
-				"Server Restart Time Slot: %s\n"+
-				"Send Gameplay Data: %s\n"+
-				"Network Quality: %s\n"+
-				"-------PENDING OPTIONS------\n",
-				options.PendingServerOptions.AutoPause, options.PendingServerOptions.AutoSaveOnDisconnect,
-				options.PendingServerOptions.DisableSeasonalEvents, options.PendingServerOptions.AutosaveInterval,
-				options.PendingServerOptions.ServerRestartTimeSlot, options.PendingServerOptions.SendGameplayData,
-				options.PendingServerOptions.NetworkQuality)
+			// Going to require some reflection magic to do this dynamically for pretty printing
+			// Will only print values that aren't zero so we dont spam the console with nil info.
+			s := reflect.ValueOf(options.PendingServerOptions)
+			for i := 0; i < s.NumField(); i++ {
+				if !s.Field(i).IsZero() {
+					log.Info().Msgf(
+						"\n-------PENDING OPTIONS------\n"+
+							"%s %s"+
+							"\n-------PENDING OPTIONS------\n",
+						s.Type().Field(i).Name, s.Field(i).String())
+				}
+			}
+
+			/*appliedMessage += fmt.Sprintf("\n-------PENDING OPTIONS------\n"+
+			"Automatic Pause: %s\n"+
+			"Auto Save on Disconnect: %s\n"+
+			"Disable Seasonal Events: %s\n"+
+			"Autosave Interval: %s\n"+
+			"Server Restart Time Slot: %s\n"+
+			"Send Gameplay Data: %s\n"+
+			"Network Quality: %s\n"+
+			"-------PENDING OPTIONS------\n",
+			options.PendingServerOptions.AutoPause, options.PendingServerOptions.AutoSaveOnDisconnect,
+			options.PendingServerOptions.DisableSeasonalEvents, options.PendingServerOptions.AutosaveInterval,
+			options.PendingServerOptions.ServerRestartTimeSlot, options.PendingServerOptions.SendGameplayData,
+			options.PendingServerOptions.NetworkQuality)*/
 		}
 
 		for _, line := range strings.Split(appliedMessage, "\n") {
