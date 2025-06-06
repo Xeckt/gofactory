@@ -24,7 +24,10 @@ func (h *CheckHealthCommand) Run(ctx *Context) error {
 	if health == nil {
 		log.Fatal().Msgf("health check command returned nil health response: %+v", ctx.Client)
 	}
-	log.Info().Msgf("Health check returned: %+v", health.Health)
+	if len(health.CustomData) > 0 {
+		log.Info().Msgf("Server health: %+v\nCustom data reported: %s", health.Health, health.CustomData)
+	}
+	log.Info().Msgf("Server health: %+v", health.Health)
 	return nil
 }
 
