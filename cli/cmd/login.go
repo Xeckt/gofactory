@@ -68,7 +68,7 @@ var passwordlessSubCmd = &cobra.Command{
 			"privilege", privilegeFlag,
 			"new token", client.Token,
 			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
-				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_TOKEN)),
+				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
 		))
 
 	},
@@ -106,7 +106,7 @@ var passwordSubCmd = &cobra.Command{
 			"privilege", privilegeFlag,
 			"new token", client.Token,
 			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
-				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_TOKEN)),
+				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
 		))
 	},
 }

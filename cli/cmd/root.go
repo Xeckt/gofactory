@@ -28,19 +28,19 @@ var (
 )
 
 const VERSION = "0.0.1"
-const ENV_URL = "GF_URL"
-const ENV_TOKEN = "GF_TOKEN"
+const ENV_GF_URL = "GF_URL"
+const ENV_GF_TOKEN = "GF_TOKEN"
 
 func init() {
 	Logger = pterm.DefaultLogger.WithLevel(pterm.LogLevelInfo)
 
-	serverUrl = os.Getenv(ENV_URL)
-	serverToken = os.Getenv(ENV_TOKEN)
+	serverUrl = os.Getenv(ENV_GF_URL)
+	serverToken = os.Getenv(ENV_GF_TOKEN)
 
 	if len(serverUrl) == 0 || len(serverToken) == 0 {
-		Logger.Fatal("One of the required environment variables are not set", Logger.Args(
-			fmt.Sprintf("%s", ENV_URL), serverUrl,
-			fmt.Sprintf("%s", ENV_TOKEN), serverToken))
+		Logger.Fatal("check for empty environment variables", Logger.Args(
+			fmt.Sprintf("%s", ENV_GF_URL), serverUrl,
+			fmt.Sprintf("%s", ENV_GF_TOKEN), serverToken))
 	}
 
 	client = api.NewGoFactoryClient(serverUrl, serverToken, true)
@@ -50,6 +50,7 @@ func init() {
 
 	Root.PersistentPreRun = func(cmd *cobra.Command, args []string) {
 		if Trace {
+			Logger.Warn("TRACING WILL DISPLAY SENSITIVE INFORMATION!")
 			Logger.Level = pterm.LogLevelTrace
 			Logger = Logger.WithCaller()
 		}
