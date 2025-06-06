@@ -14,6 +14,18 @@ var (
 	Root = &cobra.Command{
 		Use:   "gofactory",
 		Short: "cli tool for interacting with a satisfactory dedicated server",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			if Trace {
+				Logger.Warn("TRACING WILL DISPLAY SENSITIVE INFORMATION!")
+				Logger.Level = pterm.LogLevelTrace
+				Logger = Logger.WithCaller()
+			}
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(os.Args) == 1 {
+				StartUi()
+			}
+		},
 	}
 
 	Trace bool
@@ -47,12 +59,39 @@ func init() {
 	ctx = context.Background()
 
 	Root.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "set the cli to trace mode")
+}
 
-	Root.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		if Trace {
-			Logger.Warn("TRACING WILL DISPLAY SENSITIVE INFORMATION!")
-			Logger.Level = pterm.LogLevelTrace
-			Logger = Logger.WithCaller()
-		}
+func StartUi() {
+	selected, err := selectMenu.Show()
+	if err != nil {
+		Logger.Fatal(err.Error())
 	}
+
+	switch selected {
+	case "query server":
+		queryServerCommand.Run(queryServerCommand, []string{})
+	case "health check":
+		healthCheckCmd.Run(healthCheckCmd, []string{})
+	case "login":
+		selected, err := loginMenu.Show()
+		if err != nil {
+			Logger.Fatal(err.Error())
+		}
+		switch selected {
+		case "password":
+			pInput := pterm.DefaultInteractiveTextInput.WithMask("*")
+			password, err := pInput.Show("Enter password to authenticate")
+			if err != nil {
+				Logger.Fatal(err.Error())
+			}
+			privilege, err := privilegeMenu.Show()
+			if err != nil {
+				Logger.Fatal(err.Error())
+			}
+			fmt.Println(password, privilege)
+		}
+	default:
+		Logger.Error("Unknown option")
+	}
+	StartUi()
 }

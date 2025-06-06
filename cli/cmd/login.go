@@ -47,7 +47,7 @@ var passwordlessSubCmd = &cobra.Command{
 		case "apitoken":
 			privilegeFlag = api.API_TOKEN_PRIVILEGE
 		default:
-			Logger.Error("Unknown privilege type", Logger.Args(
+			Logger.Fatal("Unknown privilege type", Logger.Args(
 				"specified:", privilegeFlag,
 				"expected:", validPrivilegeFlags,
 			))

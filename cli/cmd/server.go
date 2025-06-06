@@ -29,10 +29,10 @@ var queryServerCommand = &cobra.Command{
 				"state object", state),
 		)
 		if err != nil {
-			Logger.Error("query server error", Logger.Args("error", err))
+			Logger.Fatal("query server error", Logger.Args("error", err))
 		}
 		if state == nil {
-			Logger.Error("query server state returned nil response")
+			Logger.Fatal("query server state returned nil response")
 		}
 
 		runningTime := fmt.Sprintf("%02d:%02d:%02d",
@@ -72,11 +72,11 @@ var getServerOptionsCommand = &cobra.Command{
 
 		options, err := client.GetServerOptions(ctx)
 		if err != nil {
-			Logger.Error("get server options error", Logger.Args("error", err))
+			Logger.Fatal("get server options error", Logger.Args("error", err))
 		}
 
 		if options == nil {
-			Logger.Error("get server options returned nil response")
+			Logger.Fatal("get server options returned nil response")
 		}
 
 		Logger.Trace("server options response", Logger.Args(
