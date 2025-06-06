@@ -10,7 +10,7 @@ var healthCheckCmd = &cobra.Command{
 	Short: "Run basic health check against the HTTPS api",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		log.Trace().Msgf("health check command called with ctx %v and client %+v", ctx, client)
+		log.Trace().Msgf("health check command called with ctx %v and client %+v", ctx, &client)
 		health, err := client.GetServerHealth(ctx, "gofactory-cli-healthcheck-call")
 		if err != nil {
 			log.Fatal().Err(err).Msg("error during health check command")
