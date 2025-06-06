@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"strings"
 
 	"github.com/alchemicalkube/gofactory/api"
 	"github.com/rs/zerolog/log"
@@ -31,7 +33,44 @@ func (h *CheckHealthCommand) Run(ctx *Context) error {
 	return nil
 }
 
-type PasswordlessLoginCommand struct{}
+type PasswordlessLoginCommand struct {
+	Privilege string `arg:"" required:"" help:"The privilege to attach to the returned token"`
+}
+
+func (p *PasswordlessLoginCommand) Run(ctx *Context) error {
+	// Make sure we have the correct casing for the privilege level.
+	switch strings.ToLower(p.Privilege) {
+	case "notauthenticated":
+		p.Privilege = "NotAuthenticated"
+	case "client":
+		p.Privilege = "Client"
+	case "administrator":
+		p.Privilege = "Administrator"
+	case "initialadmin:":
+		p.Privilege = "InitialAdmin"
+	case "apitoken":
+		p.Privilege = "ApiToken"
+	default:
+		return fmt.Errorf("invalid privilege, use one of: %s | %s | %s | %s | %s",
+			api.NOT_AUTHENTICATED_PRIVILEGE, api.CLIENT_PRIVILEGE, api.ADMINISTRATOR_PRIVILEGE,
+			api.INITIAL_ADMIN_PRIVILEGE, api.API_TOKEN_PRIVILEGE)
+	}
+	err := ctx.Client.PasswordlessLogin(ctx.ApiContext, p.Privilege)
+	if err != nil {
+		log.Fatal().Err(err)
+	}
+	log.Info().Msgf("Successfully authenticated with privilege: %s", p.Privilege)
+	log.Info().Msgf("Token returned: %s", ctx.Client.Token)
+	log.Warn().Msgf("If you wish to use this token, make sure to replace your %s environment variable!", ENV_TOKEN)
+	return nil
+}
+
+func (p *PasswordlessLoginCommand) Help() string {
+	return fmt.Sprintf("Possible values for <privilege> are:"+
+		"\n\t%s\t%s\n\t%s\t%s\n\t%s",
+		api.NOT_AUTHENTICATED_PRIVILEGE, api.CLIENT_PRIVILEGE, api.ADMINISTRATOR_PRIVILEGE,
+		api.INITIAL_ADMIN_PRIVILEGE, api.API_TOKEN_PRIVILEGE)
+}
 
 type PasswordLoginCommand struct{}
 
