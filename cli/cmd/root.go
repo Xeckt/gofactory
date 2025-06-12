@@ -71,9 +71,9 @@ func StartUi() {
 
 	switch selected {
 	case "query server":
-		queryServerCommand.Run(queryServerCommand, []string{})
+		queryServer()
 	case "health check":
-		healthCheckCmd.Run(healthCheckCmd, []string{})
+		healthCheck()
 	case "login":
 		selected, err := loginMenu.Show()
 		if err != nil {
