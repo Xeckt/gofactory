@@ -39,9 +39,11 @@ var (
 	Logger      *pterm.Logger
 )
 
-const VERSION = "0.0.1"
-const ENV_GF_URL = "GF_URL"
-const ENV_GF_TOKEN = "GF_TOKEN"
+const (
+	VERSION      = "0.0.1"
+	ENV_GF_URL   = "GF_URL"
+	ENV_GF_TOKEN = "GF_TOKEN"
+)
 
 func init() {
 	Logger = pterm.DefaultLogger.WithLevel(pterm.LogLevelInfo)
@@ -49,10 +51,10 @@ func init() {
 	serverUrl = os.Getenv(ENV_GF_URL)
 	serverToken = os.Getenv(ENV_GF_TOKEN)
 
+	fmt.Println(serverToken)
+
 	if len(serverUrl) == 0 || len(serverToken) == 0 {
-		Logger.Fatal("check for empty environment variables", Logger.Args(
-			fmt.Sprintf("%s", ENV_GF_URL), serverUrl,
-			fmt.Sprintf("%s", ENV_GF_TOKEN), serverToken))
+		Logger.Fatal("check for empty environment variables", Logger.Args(serverUrl, serverToken))
 	}
 
 	client = api.NewGoFactoryClient(serverUrl, serverToken, true)
@@ -77,6 +79,12 @@ func StartUi() {
 		if err != nil {
 			Logger.Fatal(err.Error())
 		}
+
+		privilege, err := privilegeMenu.Show()
+		if err != nil {
+			Logger.Fatal(err.Error())
+		}
+
 		switch selected {
 		case "password":
 			pInput := pterm.DefaultInteractiveTextInput.WithMask("*")
@@ -84,14 +92,11 @@ func StartUi() {
 			if err != nil {
 				Logger.Fatal(err.Error())
 			}
-			privilege, err := privilegeMenu.Show()
-			if err != nil {
-				Logger.Fatal(err.Error())
-			}
-			fmt.Println(password, privilege)
+			passwordLogin(password, privilege)
+		case "passwordless":
+			passwordlessLogin(privilege)
 		}
 	default:
 		Logger.Error("Unknown option")
 	}
-	StartUi()
 }
