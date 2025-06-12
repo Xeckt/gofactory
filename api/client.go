@@ -29,7 +29,7 @@ type GoFactoryClient struct {
 
 // ApiResponse is an empty interface used as a placeholder
 // for API responses returned by the Satisfactory dedicated server.
-type ApiResponse interface{}
+type ApiResponse any
 
 // NewGoFactoryClient creates a new GoFactoryClient with the specified URL,
 // authentication token, and an option to skip TLS verification.
