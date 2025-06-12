@@ -107,7 +107,7 @@ var getServerOptionsCommand = &cobra.Command{
 				}
 			}
 
-			if m != nil {
+			if len(m) > 0 {
 				Logger.AppendKeyStyles(pendingOptionsStyle)
 				Logger.Info("pending server options", Logger.ArgsFromMap(m))
 			}
