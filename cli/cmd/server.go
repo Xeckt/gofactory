@@ -19,39 +19,43 @@ var queryServerCommand = &cobra.Command{
 	Short: "Receive information about the current server state.",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		state, err := client.QueryServerState(ctx)
-		Logger.Trace("query server command",
-			Logger.Args(
-				"context", ctx,
-				"client pointer", &client,
-				"client object", client,
-				"state pointer", &state,
-				"state object", state),
-		)
-		if err != nil {
-			Logger.Fatal("query server error", Logger.Args("error", err))
-		}
-		if state == nil {
-			Logger.Fatal("query server state returned nil response")
-		}
-
-		runningTime := fmt.Sprintf("%02d:%02d:%02d",
-			state.TotalGameDuration/3600,
-			(state.TotalGameDuration%3600)/60,
-			state.TotalGameDuration%60)
-
-		Logger.Info("server state", Logger.Args(
-			"active session", state.ActiveSessionName,
-			"connected players", state.NumConnectedPlayers,
-			"player limit", state.PlayerLimit,
-			"tech tier", state.TechTier,
-			"phase", state.GamePhase,
-			"server running", state.IsGameRunning,
-			"running time", runningTime,
-			"paused", state.IsGamePaused,
-			"average tick rate", state.AverageTickRate,
-			"auto load session name", state.AutoLoadSessionName))
+		queryServer()
 	},
+}
+
+func queryServer() {
+	state, err := client.QueryServerState(ctx)
+	Logger.Trace("query server command",
+		Logger.Args(
+			"context", ctx,
+			"client pointer", &client,
+			"client object", client,
+			"state pointer", &state,
+			"state object", state),
+	)
+	if err != nil {
+		Logger.Fatal("query server error", Logger.Args("error", err))
+	}
+	if state == nil {
+		Logger.Fatal("query server state returned nil response")
+	}
+
+	runningTime := fmt.Sprintf("%02d:%02d:%02d",
+		state.TotalGameDuration/3600,
+		(state.TotalGameDuration%3600)/60,
+		state.TotalGameDuration%60)
+
+	Logger.Info("server state", Logger.Args(
+		"active session", state.ActiveSessionName,
+		"connected players", state.NumConnectedPlayers,
+		"player limit", state.PlayerLimit,
+		"tech tier", state.TechTier,
+		"phase", state.GamePhase,
+		"server running", state.IsGameRunning,
+		"running time", runningTime,
+		"paused", state.IsGamePaused,
+		"average tick rate", state.AverageTickRate,
+		"auto load session name", state.AutoLoadSessionName))
 }
 
 var serverOptionsCommand = &cobra.Command{
@@ -64,55 +68,59 @@ var getServerOptionsCommand = &cobra.Command{
 	Use:   "get",
 	Short: "get server options",
 	Run: func(cmd *cobra.Command, args []string) {
-		Logger.Trace("get server options", Logger.Args(
-			"context", ctx,
-			"client pointer", &client,
-			"client object", client,
-		))
-
-		options, err := client.GetServerOptions(ctx)
-		if err != nil {
-			Logger.Fatal("get server options error", Logger.Args("error", err))
-		}
-
-		if options == nil {
-			Logger.Fatal("get server options returned nil response")
-		}
-
-		Logger.Trace("server options response", Logger.Args(
-			"options pointer", &options,
-			"options object", options,
-		))
-
-		Logger.Info("applied server options", Logger.Args(
-			"automatic pause", options.ServerOptions.AutoPause,
-			"auto save on disconnect", options.ServerOptions.AutoSaveOnDisconnect,
-			"disable seasonal events", options.ServerOptions.DisableSeasonalEvents,
-			"autosave interval", options.ServerOptions.AutosaveInterval,
-			"server restart time", options.ServerOptions.ServerRestartTimeSlot,
-			"send gameplay data", options.ServerOptions.SendGameplayData,
-			"network quality", options.ServerOptions.NetworkQuality))
-
-		if !reflect.ValueOf(options.PendingServerOptions).IsZero() {
-			// I f*cking love pterm.
-
-			m := make(map[string]any)
-			pendingOptionsStyle := make(map[string]pterm.Style)
-
-			s := reflect.ValueOf(options.PendingServerOptions)
-			for i := 0; i < s.NumField(); i++ {
-				if !s.Field(i).IsZero() {
-					pendingOptionsStyle[s.Type().Field(i).Name] = *pterm.NewStyle(pterm.FgYellow)
-					m[s.Type().Field(i).Name] = s.Field(i).String()
-				}
-			}
-
-			if len(m) > 0 {
-				Logger.AppendKeyStyles(pendingOptionsStyle)
-				Logger.Info("pending server options", Logger.ArgsFromMap(m))
-			}
-		}
+		getServerOptions()
 	},
+}
+
+func getServerOptions() {
+	Logger.Trace("get server options", Logger.Args(
+		"context", ctx,
+		"client pointer", &client,
+		"client object", client,
+	))
+
+	options, err := client.GetServerOptions(ctx)
+	if err != nil {
+		Logger.Fatal("get server options error", Logger.Args("error", err))
+	}
+
+	if options == nil {
+		Logger.Fatal("get server options returned nil response")
+	}
+
+	Logger.Trace("server options response", Logger.Args(
+		"options pointer", &options,
+		"options object", options,
+	))
+
+	Logger.Info("applied server options", Logger.Args(
+		"automatic pause", options.ServerOptions.AutoPause,
+		"auto save on disconnect", options.ServerOptions.AutoSaveOnDisconnect,
+		"disable seasonal events", options.ServerOptions.DisableSeasonalEvents,
+		"autosave interval", options.ServerOptions.AutosaveInterval,
+		"server restart time", options.ServerOptions.ServerRestartTimeSlot,
+		"send gameplay data", options.ServerOptions.SendGameplayData,
+		"network quality", options.ServerOptions.NetworkQuality))
+
+	if !reflect.ValueOf(options.PendingServerOptions).IsZero() {
+		// I f*cking love pterm.
+
+		m := make(map[string]any)
+		pendingOptionsStyle := make(map[string]pterm.Style)
+
+		s := reflect.ValueOf(options.PendingServerOptions)
+		for i := 0; i < s.NumField(); i++ {
+			if !s.Field(i).IsZero() {
+				pendingOptionsStyle[s.Type().Field(i).Name] = *pterm.NewStyle(pterm.FgYellow)
+				m[s.Type().Field(i).Name] = s.Field(i).String()
+			}
+		}
+
+		if len(m) > 0 {
+			Logger.AppendKeyStyles(pendingOptionsStyle)
+			Logger.Info("pending server options", Logger.ArgsFromMap(m))
+		}
+	}
 }
 
 var setServerOptionsCommand = &cobra.Command{
