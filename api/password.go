@@ -93,7 +93,6 @@ func (c *GoFactoryClient) PasswordlessLogin(ctx context.Context, privilege strin
 
 	tokenResponse, err := CreateAndSendPostRequestWithHeaders[LoginResponse](ctx, c, headers, PasswordlessLoginFunction, functionBody)
 	if err != nil {
-		fmt.Println("Error is here", tokenResponse, err)
 		return err
 	}
 
@@ -113,7 +112,6 @@ func (c *GoFactoryClient) PasswordLogin(ctx context.Context, privilege string, p
 			Password:              password,
 		},
 	})
-
 	if err != nil {
 		return err
 	}
@@ -166,7 +164,6 @@ func (c *GoFactoryClient) SetClientPassword(ctx context.Context, newPassword str
 
 	var apiError APIError
 	err = c.SendPostRequest(ctx, req, &apiError)
-
 	if err != nil {
 		return err
 	}
