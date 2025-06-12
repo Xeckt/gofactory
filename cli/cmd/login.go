@@ -22,19 +22,7 @@ var validPrivilegeFlags = []string{
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "command to specify the type of login you wish to do",
-}
-
-var passwordlessSubCmd = &cobra.Command{
-	Use:   "passwordless",
-	Short: "authenticate with the dedicated server without password",
-	Long:  "returns the new token retrieved from the passwordless privilege to stdout",
 	Run: func(cmd *cobra.Command, args []string) {
-		Logger.Trace("passwordless", Logger.Args(
-			"client object", client,
-			"client pointer", &client,
-			"client privilege", privilegeFlag,
-		))
-
 		switch strings.ToLower(privilegeFlag) {
 		case "notauthenticated":
 			privilegeFlag = api.NOT_AUTHENTICATED_PRIVILEGE
@@ -52,26 +40,41 @@ var passwordlessSubCmd = &cobra.Command{
 				"expected:", validPrivilegeFlags,
 			))
 		}
-
-		err := client.PasswordlessLogin(ctx, privilegeFlag)
-		if err != nil {
-			Logger.Fatal("error with passwordless login", Logger.Args("error", err))
-		}
-
-		if len(client.Token) == 0 {
-			Logger.Fatal("token returned is empty. Are you sure it is not claimed or no client protection password is enabled?")
-		}
-
-		Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
-
-		Logger.Info("server response success", Logger.Args(
-			"privilege", privilegeFlag,
-			"new token", client.Token,
-			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
-				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
-		))
-
 	},
+}
+
+var passwordlessSubCmd = &cobra.Command{
+	Use:   "passwordless",
+	Short: "authenticate with the dedicated server without password",
+	Long:  "returns the new token retrieved from the passwordless privilege to stdout",
+	Run: func(cmd *cobra.Command, args []string) {
+		Logger.Trace("passwordless", Logger.Args(
+			"client object", client,
+			"client pointer", &client,
+			"client privilege", privilegeFlag,
+		))
+		passwordlessLogin(privilegeFlag)
+	},
+}
+
+func passwordlessLogin(privilege string) {
+	err := client.PasswordlessLogin(ctx, privilege)
+	if err != nil {
+		Logger.Fatal("error with passwordless login", Logger.Args("error", err))
+	}
+
+	if len(client.Token) == 0 {
+		Logger.Fatal("api returned an empty token. are you sure it is not claimed or no client protection password is enabled?")
+	}
+
+	Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
+
+	Logger.Info("server response success", Logger.Args(
+		"privilege", privilegeFlag,
+		"new token", client.Token,
+		"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
+			Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
+	))
 }
 
 var passwordFlag string
@@ -83,32 +86,35 @@ var passwordSubCmd = &cobra.Command{
 		if passwordFlag == "" {
 			Logger.Fatal("You must provide a password")
 		}
-
-		Logger.Trace("password", Logger.Args(
-			"client object", client,
-			"client pointer", &client,
-			"client privilege", privilegeFlag,
-			"password", passwordFlag,
-		))
-
-		err := client.PasswordLogin(ctx, privilegeFlag, passwordFlag)
-		if err != nil {
-			Logger.Fatal("password command error", Logger.Args("error", err))
-		}
-
-		if client.Token == "" {
-			Logger.Fatal("token returned is empty. are you sure the information you provided was correct?")
-		}
-
-		Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
-
-		Logger.Info("server response success", Logger.Args(
-			"privilege", privilegeFlag,
-			"new token", client.Token,
-			"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
-				Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
-		))
+		passwordLogin(passwordFlag, privilegeFlag)
 	},
+}
+
+func passwordLogin(password string, privilege string) {
+	Logger.Trace("password", Logger.Args(
+		"client object", client,
+		"client pointer", &client,
+		"client privilege", privilegeFlag,
+		"password", passwordFlag,
+	))
+
+	err := client.PasswordLogin(ctx, privilege, password)
+	if err != nil {
+		Logger.Fatal("password command error", Logger.Args("error", err))
+	}
+
+	if client.Token == "" {
+		Logger.Fatal("api returned an empty token. is your password correct?")
+	}
+
+	Logger.AppendKeyStyle("warning", *pterm.NewStyle(pterm.BgYellow))
+
+	Logger.Info("server response success", Logger.Args(
+		"privilege", privilegeFlag,
+		"new token", client.Token,
+		"warning", pterm.NewStyle(pterm.FgWhite, pterm.BgYellow).
+			Sprint(fmt.Sprintf("if you wish to use this with gofactory-cli, replace your %s environment variable", ENV_GF_TOKEN)),
+	))
 }
 
 func init() {
