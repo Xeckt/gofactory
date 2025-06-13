@@ -130,11 +130,12 @@ var setServerOptionsCommand = &cobra.Command{
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		/*
-			Since there are a lot of options here, I'll need to think about how to actually apply them.
-			By standard, we will allow multiple flags to specify the server options as sometimes you may only want
-			to set one or two options. But if you want to do loads, might be worth specifying a file?
+				Since there are a lot of options here, I'll need to think about how to actually apply them.
+				By standard, we will allow multiple flags to specify the server options as sometimes you may only want
+				to set one or two options. But if you want to do loads, might be worth specifying a file?
 
 			TODO: Think carefully about this one.
+
 		*/
 	},
 }
@@ -144,17 +145,21 @@ var serverNameFlag string
 var renameServerCommand = &cobra.Command{
 	Use:   "rename",
 	Short: "rename server",
-	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		renameServer(serverNameFlag)
 	},
 }
 
 func renameServer(name string) {
+	if len(serverNameFlag) == 0 {
+		Logger.Fatal("you must specify --name")
+	}
 	err := client.RenameServer(ctx, name)
 	if err != nil {
 		Logger.Fatal(err.Error())
 	}
+
+	Logger.Info("server renamed", Logger.Args("new name", name))
 }
 
 var claimServerCommand = &cobra.Command{
@@ -169,17 +174,22 @@ func claimServer(serverName string, password string) {
 	if len(passwordFlag) == 0 || len(serverNameFlag) == 0 {
 		Logger.Fatal("you must specify --password and --name")
 	}
+
 	if len(client.Token) != 0 {
 		Logger.Fatal("your GF_TOKEN environment variable is not empty")
 	}
+
 	claimData := api.ClaimRequestData{
 		ServerName:    serverName,
 		AdminPassword: password,
 	}
+
 	err := client.ClaimServer(ctx, claimData)
 	if err != nil {
 		Logger.Fatal(err.Error())
 	}
+
+	Logger.Info("server claimed", Logger.Args("server name:", serverName, "password", password, "token", client.Token))
 }
 
 var setPasswordCommand = &cobra.Command{
