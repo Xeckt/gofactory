@@ -245,6 +245,35 @@ func setAdminPassword(password string) {
 	Logger.Info("admin password set")
 }
 
+var runCommand = &cobra.Command{
+	Use:   "run-command",
+	Short: "command to either shutdown the server or run a command on the server",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
+			Logger.Fatal("please specify a command to run")
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		commandRunner(args[0])
+	},
+}
+
+func commandRunner(command string) {
+	if command == "shutdown" {
+		err := client.ShutdownServer(ctx)
+		if err != nil {
+			Logger.Fatal(err.Error())
+		}
+	} else {
+		err := client.RunServerCommand(ctx, command)
+		if err != nil {
+			Logger.Fatal(err.Error())
+		}
+	}
+	Logger.Info("successful", Logger.Args("command", command))
+}
+
 func init() {
 	Root.AddCommand(serverCommand)
 
@@ -253,6 +282,7 @@ func init() {
 	serverCommand.AddCommand(serverOptionsCommand)
 	serverCommand.AddCommand(renameServerCommand)
 	serverCommand.AddCommand(setPasswordCommand)
+	serverCommand.AddCommand(runCommand)
 
 	serverCommand.PersistentFlags().StringVarP(&passwordFlag, "password", "p", "", "flag to supply a password to required commands")
 	serverCommand.PersistentFlags().StringVarP(&serverNameFlag, "name", "n", "", "flag to supply a server name to required commands")

@@ -54,7 +54,7 @@ func init() {
 	if len(serverToken) == 0 {
 		Logger.Warn("check for empty environment variables", Logger.Args(serverUrl, serverToken))
 	} else if len(serverUrl) == 0 {
-		Logger.Fatal("GF_URL cannot be empty!")
+		Logger.Fatal("GF_URL cannot be empty")
 	}
 
 	client = api.NewGoFactoryClient(serverUrl, serverToken, true)
