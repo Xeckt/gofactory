@@ -182,25 +182,56 @@ func claimServer(serverName string, password string) {
 	}
 }
 
+var setPasswordCommand = &cobra.Command{
+	Use:   "set-password",
+	Short: "allows you to set admin or client password",
+	Args:  cobra.ExactArgs(1),
+}
+
 var setClientPasswordCommand = &cobra.Command{
-	Use:   "set-client-password",
-	Short: "command to set the client password",
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(passwordFlag) == 0 {
-			Logger.Fatal("you must specify --password")
+	Use:   "client",
+	Short: "command to set client password",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
+			Logger.Fatal("no password specified")
 		}
-		setClientPassword(passwordFlag)
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		setClientPassword(args[0])
 	},
 }
 
 func setClientPassword(password string) {
-	if len(password) == 0 {
-		Logger.Fatal("you must specify --password")
-	}
 	err := client.SetClientPassword(ctx, password)
 	if err != nil {
 		Logger.Fatal(err.Error())
 	}
+
+	Logger.Info("client password set")
+}
+
+var setAdminPasswordCommand = &cobra.Command{
+	Use:   "admin",
+	Short: "command to set admin password",
+	Args: func(cmd *cobra.Command, args []string) error {
+		if err := cobra.MinimumNArgs(1)(cmd, args); err != nil {
+			Logger.Fatal("no password specified")
+		}
+		return nil
+	},
+	Run: func(cmd *cobra.Command, args []string) {
+		setAdminPassword(args[0])
+	},
+}
+
+func setAdminPassword(password string) {
+	err := client.SetAdminPassword(ctx, password)
+	if err != nil {
+		Logger.Fatal(err.Error())
+	}
+
+	Logger.Info("admin password set")
 }
 
 func init() {
@@ -210,7 +241,10 @@ func init() {
 	serverCommand.AddCommand(queryServerCommand)
 	serverCommand.AddCommand(serverOptionsCommand)
 	serverCommand.AddCommand(renameServerCommand)
-	serverCommand.AddCommand(setClientPasswordCommand)
+	serverCommand.AddCommand(setPasswordCommand)
+
+	setPasswordCommand.AddCommand(setAdminPasswordCommand)
+	setPasswordCommand.AddCommand(setClientPasswordCommand)
 
 	serverCommand.PersistentFlags().StringVarP(&passwordFlag, "password", "p", "", "flag to supply a password to required commands")
 	serverCommand.PersistentFlags().StringVarP(&serverNameFlag, "name", "n", "", "flag to supply a server name to required commands")
