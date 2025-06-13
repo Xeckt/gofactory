@@ -254,12 +254,12 @@ func init() {
 	serverCommand.AddCommand(renameServerCommand)
 	serverCommand.AddCommand(setPasswordCommand)
 
-	setPasswordCommand.AddCommand(setAdminPasswordCommand)
-	setPasswordCommand.AddCommand(setClientPasswordCommand)
-
 	serverCommand.PersistentFlags().StringVarP(&passwordFlag, "password", "p", "", "flag to supply a password to required commands")
 	serverCommand.PersistentFlags().StringVarP(&serverNameFlag, "name", "n", "", "flag to supply a server name to required commands")
 
 	serverOptionsCommand.AddCommand(getServerOptionsCommand)
 	serverOptionsCommand.AddCommand(setServerOptionsCommand)
+
+	setPasswordCommand.AddCommand(setAdminPasswordCommand)
+	setPasswordCommand.AddCommand(setClientPasswordCommand)
 }
