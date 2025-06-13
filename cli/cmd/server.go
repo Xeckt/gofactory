@@ -110,7 +110,7 @@ func getServerOptions() {
 		pendingOptionsStyle := make(map[string]pterm.Style)
 
 		s := reflect.ValueOf(options.PendingServerOptions)
-		for i := 0; i < s.NumField(); i++ {
+		for i := range s.NumField() {
 			if !s.Field(i).IsZero() {
 				pendingOptionsStyle[s.Type().Field(i).Name] = *pterm.NewStyle(pterm.FgYellow)
 				m[s.Type().Field(i).Name] = s.Field(i).String()
@@ -190,6 +190,7 @@ func claimServer(serverName string, password string) {
 	}
 
 	Logger.Info("server claimed", Logger.Args("server name:", serverName, "password", password, "token", client.Token))
+	Logger.Warn("make sure to update your GF_TOKEN environment variable with the new one!")
 }
 
 var setPasswordCommand = &cobra.Command{
