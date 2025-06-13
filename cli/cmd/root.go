@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 
 	"github.com/alchemicalkube/gofactory/api"
@@ -26,6 +25,7 @@ var (
 				StartUi()
 			}
 		},
+		SilenceUsage: true,
 	}
 
 	Trace bool
@@ -51,13 +51,13 @@ func init() {
 	serverUrl = os.Getenv(ENV_GF_URL)
 	serverToken = os.Getenv(ENV_GF_TOKEN)
 
-	fmt.Println(serverToken)
-
-	if len(serverUrl) == 0 || len(serverToken) == 0 {
-		Logger.Fatal("check for empty environment variables", Logger.Args(serverUrl, serverToken))
+	if len(serverToken) == 0 {
+		Logger.Warn("check for empty environment variables", Logger.Args(serverUrl, serverToken))
+	} else if len(serverUrl) == 0 {
+		Logger.Fatal("GF_URL cannot be empty!")
 	}
 
-	client = api.NewGoFactoryClient(serverUrl, serverToken, true)
+	client = api.NewGoFactoryClient(serverUrl, "", true)
 	ctx = context.Background()
 
 	Root.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "set the cli to trace mode")
