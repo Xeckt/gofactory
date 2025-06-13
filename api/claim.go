@@ -40,8 +40,8 @@ type ClaimResponseData struct {
 // It updates the client's authentication token and privilege level upon success,
 // and verifies the server state after the claim is completed.
 func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimRequestData) error {
-	if c.currentPrivilege != INITIAL_ADMIN_PRIVILEGE {
-		return fmt.Errorf("privilege must be set to %s in order to claim the server", INITIAL_ADMIN_PRIVILEGE)
+	if c.currentPrivilege != INITIAL_ADMIN_PRIVILEGE && len(c.Token) != 0 {
+		return fmt.Errorf("privilege must be set to %s and token must be empty", INITIAL_ADMIN_PRIVILEGE)
 	}
 
 	functionBody, err := json.Marshal(ClaimRequest{
@@ -51,7 +51,7 @@ func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimReques
 	if err != nil {
 		return err
 	}
-	newToken, err := CreateAndSendPostRequest[ClaimResponse](ctx, c, ClaimServerFunction, functionBody)
+	newToken, err := CreateAndSendPostRequestWithHeaders[ClaimResponse](ctx, c, make(map[string]string), ClaimServerFunction, functionBody) // Send empty headers as we don't need authorization headers to claim
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (c *GoFactoryClient) ClaimServer(ctx context.Context, claimData ClaimReques
 	}
 
 	c.Token = newToken.Data.AuthenticationToken
-	c.currentPrivilege = ADMINISTRATOR_PRIVILEGE
+	c.currentPrivilege = API_TOKEN_PRIVILEGE
 
 	_, err = c.QueryServerState(ctx)
 	if err != nil {
