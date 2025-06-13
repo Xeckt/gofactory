@@ -182,6 +182,27 @@ func claimServer(serverName string, password string) {
 	}
 }
 
+var setClientPasswordCommand = &cobra.Command{
+	Use:   "set-client-password",
+	Short: "command to set the client password",
+	Run: func(cmd *cobra.Command, args []string) {
+		if len(passwordFlag) == 0 {
+			Logger.Fatal("you must specify --password")
+		}
+		setClientPassword(passwordFlag)
+	},
+}
+
+func setClientPassword(password string) {
+	if len(password) == 0 {
+		Logger.Fatal("you must specify --password")
+	}
+	err := client.SetClientPassword(ctx, password)
+	if err != nil {
+		Logger.Fatal(err.Error())
+	}
+}
+
 func init() {
 	Root.AddCommand(serverCommand)
 
@@ -189,6 +210,7 @@ func init() {
 	serverCommand.AddCommand(queryServerCommand)
 	serverCommand.AddCommand(serverOptionsCommand)
 	serverCommand.AddCommand(renameServerCommand)
+	serverCommand.AddCommand(setClientPasswordCommand)
 
 	serverCommand.PersistentFlags().StringVarP(&passwordFlag, "password", "p", "", "flag to supply a password to required commands")
 	serverCommand.PersistentFlags().StringVarP(&serverNameFlag, "name", "n", "", "flag to supply a server name to required commands")
