@@ -57,7 +57,7 @@ func init() {
 		Logger.Fatal("GF_URL cannot be empty!")
 	}
 
-	client = api.NewGoFactoryClient(serverUrl, "", true)
+	client = api.NewGoFactoryClient(serverUrl, serverToken, true)
 	ctx = context.Background()
 
 	Root.PersistentFlags().BoolVarP(&Trace, "trace", "t", false, "set the cli to trace mode")
