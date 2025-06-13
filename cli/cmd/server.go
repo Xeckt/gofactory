@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/alchemicalkube/gofactory/api"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 )
@@ -138,10 +139,60 @@ var setServerOptionsCommand = &cobra.Command{
 	},
 }
 
+var serverNameFlag string
+
+var renameServerCommand = &cobra.Command{
+	Use:   "rename",
+	Short: "rename server",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		renameServer(serverNameFlag)
+	},
+}
+
+func renameServer(name string) {
+	err := client.RenameServer(ctx, name)
+	if err != nil {
+		Logger.Fatal(err.Error())
+	}
+}
+
+var claimServerCommand = &cobra.Command{
+	Use:   "claim",
+	Short: "claim server",
+	Run: func(cmd *cobra.Command, args []string) {
+		claimServer(serverNameFlag, passwordFlag)
+	},
+}
+
+func claimServer(serverName string, password string) {
+	if len(passwordFlag) == 0 || len(serverNameFlag) == 0 {
+		Logger.Fatal("you must specify --password and --name")
+	}
+	if len(client.Token) != 0 {
+		Logger.Fatal("your GF_TOKEN environment variable is not empty")
+	}
+	claimData := api.ClaimRequestData{
+		ServerName:    serverName,
+		AdminPassword: password,
+	}
+	err := client.ClaimServer(ctx, claimData)
+	if err != nil {
+		Logger.Fatal(err.Error())
+	}
+}
+
 func init() {
 	Root.AddCommand(serverCommand)
+
+	serverCommand.AddCommand(claimServerCommand)
 	serverCommand.AddCommand(queryServerCommand)
 	serverCommand.AddCommand(serverOptionsCommand)
+	serverCommand.AddCommand(renameServerCommand)
+
+	serverCommand.PersistentFlags().StringVarP(&passwordFlag, "password", "p", "", "flag to supply a password to required commands")
+	serverCommand.PersistentFlags().StringVarP(&serverNameFlag, "name", "n", "", "flag to supply a server name to required commands")
+
 	serverOptionsCommand.AddCommand(getServerOptionsCommand)
 	serverOptionsCommand.AddCommand(setServerOptionsCommand)
 }
