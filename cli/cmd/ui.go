@@ -5,6 +5,18 @@ import (
 	"github.com/pterm/pterm"
 )
 
+const (
+	QUERY_SERVER_OPTION        = "query server"
+	HEALTH_CHECK_OPTION        = "health check"
+	RENAME_SERVER_OPTION       = "rename server"
+	CLAIM_SERVER_OPTION        = "claim server"
+	GET_ADVANCED_GAME_SETTINGS = "get advanced game settings"
+
+	LOGIN_OPTION              = "login"
+	LOGIN_PASSWORD_OPTION     = "password"
+	LOGIN_PASSWORDLESS_OPTION = "passwordless"
+)
+
 var (
 	selectMenu = pterm.InteractiveSelectPrinter{
 		TextStyle:     pterm.NewStyle(pterm.FgLightCyan),
