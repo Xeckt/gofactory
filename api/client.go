@@ -34,7 +34,7 @@ type ApiResponse any
 // NewGoFactoryClient creates a new GoFactoryClient with the specified URL,
 // authentication token, and an option to skip TLS verification.
 func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryClient {
-	return &GoFactoryClient{
+	client := &GoFactoryClient{
 		URL:   url,
 		Token: token,
 		Client: &http.Client{
@@ -42,7 +42,12 @@ func NewGoFactoryClient(url string, token string, skipVerify bool) *GoFactoryCli
 				TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 			},
 		},
+		currentPrivilege: API_TOKEN_PRIVILEGE,
 	}
+	if len(token) == 0 {
+		client.currentPrivilege = INITIAL_ADMIN_PRIVILEGE
+	}
+	return client
 }
 
 // CreatePostRequest creates a HTTP POST request to call the specified API function.
