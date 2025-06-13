@@ -17,7 +17,7 @@ an API client library to interact with your Satisfactory dedicated server HTTPS 
 The v1.0.0 API library has just been released. See: [API MD file](./API.md)
 
 ### CLI
-- [ ] Full CLI GUI (Still unsure)
+- [ ] Full TUI 
 - [ ] Support for all API operations
 - [ ] Server specific features
   - Non-API export/import saves
